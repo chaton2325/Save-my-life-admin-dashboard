@@ -9,19 +9,21 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token && state.user?.role === 'admin',
+    isAuthenticated: (state) => !!state.token && !!state.user,
+    isAdmin: (state) => state.user?.role === 'admin',
   },
 
   actions: {
-    async login(phoneNumber, password) {
-      const { user, token } = await authService.login({ phoneNumber, password });
-      if (user.role !== 'admin') {
-        throw new Error('Accès réservé aux administrateurs.');
-      }
+    setSession(user, token) {
       this.token = token;
       this.user = user;
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
+    },
+
+    async login(phoneNumber, password) {
+      const { user, token } = await authService.login({ phoneNumber, password });
+      this.setSession(user, token);
     },
 
     logout() {

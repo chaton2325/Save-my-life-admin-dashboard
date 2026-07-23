@@ -1,7 +1,7 @@
 {
   "name": "save-my-life-admin-dashboard",
   "version": "1.0.0",
-  "description": "Tableau de bord administrateur pour Save My Life",
+  "description": "Frontend Save My Life (patients et administrateurs)",
   "type": "module",
   "scripts": {
     "dev": "vite",

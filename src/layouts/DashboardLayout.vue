@@ -19,11 +19,20 @@
         Save My Life
       </div>
       <nav>
-        <RouterLink to="/patients" class="nav-link" @click="sidebarOpen = false">
+        <RouterLink v-if="!authStore.isAdmin" to="/accueil" class="nav-link" @click="sidebarOpen = false">
+          <AppIcon name="home" size="sm" />
+          Accueil
+        </RouterLink>
+        <RouterLink v-if="authStore.isAdmin" to="/patients" class="nav-link" @click="sidebarOpen = false">
           <AppIcon name="users" size="sm" />
           Patients
         </RouterLink>
-        <RouterLink to="/administrateurs" class="nav-link" @click="sidebarOpen = false">
+        <RouterLink
+          v-if="authStore.isAdmin"
+          to="/administrateurs"
+          class="nav-link"
+          @click="sidebarOpen = false"
+        >
           <AppIcon name="userPlus" size="sm" />
           Administrateurs
         </RouterLink>

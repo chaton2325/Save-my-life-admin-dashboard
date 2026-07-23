@@ -1,42 +1,37 @@
 <template>
   <div class="auth-screen">
-    <section class="auth-brand">
-      <div class="auth-brand__decor">
-        <span class="blob blob--1"></span>
-        <span class="blob blob--2"></span>
-      </div>
-
-      <svg
-        class="auth-curve auth-curve--vertical"
-        viewBox="0 0 100 800"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path d="M50,0 Q100,200 50,400 Q0,600 50,800 L100,800 L100,0 Z" />
-      </svg>
-      <svg
-        class="auth-curve auth-curve--horizontal"
-        viewBox="0 0 400 60"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path d="M0,30 Q100,60 200,30 Q300,0 400,30 L400,60 L0,60 Z" />
-      </svg>
-
-      <div class="auth-brand__content">
-        <div class="auth-brand__logo">
-          <AppIcon name="heartbeat" size="lg" />
-        </div>
-        <h1>Save My Life</h1>
-        <p>Gérez vos patients et vos administrateurs en toute sécurité, où que vous soyez.</p>
-      </div>
-    </section>
+    <AuthBrandPanel />
 
     <section class="auth-form-panel">
       <form class="auth-form" @submit.prevent="handleSubmit">
         <div class="auth-form__header">
-          <h2>Connexion administrateur</h2>
-          <p>Connectez-vous avec votre numéro de téléphone</p>
+          <h2>Connexion</h2>
+          <p>Connectez-vous à votre compte Save My Life</p>
+        </div>
+
+        <div class="segmented" role="tablist">
+          <button
+            type="button"
+            class="segmented__option"
+            role="tab"
+            :class="{ 'is-active': method === 'password' }"
+            :aria-selected="method === 'password'"
+            @click="switchMethod('password')"
+          >
+            <AppIcon name="lock" size="sm" />
+            Mot de passe
+          </button>
+          <button
+            type="button"
+            class="segmented__option"
+            role="tab"
+            :class="{ 'is-active': method === 'sms' }"
+            :aria-selected="method === 'sms'"
+            @click="switchMethod('sms')"
+          >
+            <AppIcon name="messageCircle" size="sm" />
+            Code SMS
+          </button>
         </div>
 
         <div class="field">
@@ -53,31 +48,42 @@
           </div>
         </div>
 
-        <div class="field">
+        <div v-if="method === 'password'" class="field">
           <label for="password">Mot de passe</label>
           <div class="input-icon">
             <AppIcon name="lock" size="sm" />
             <input id="password" v-model="password" type="password" placeholder="••••••••" required />
           </div>
         </div>
+        <p v-else class="field-hint">
+          <AppIcon name="messageCircle" size="sm" />
+          Un code à 6 chiffres vous sera envoyé par SMS pour vous connecter sans mot de passe.
+        </p>
 
         <p v-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
 
         <button type="submit" class="btn btn--primary btn--block" :disabled="loading">
           <span v-if="loading" class="spinner"></span>
-          {{ loading ? 'Connexion...' : 'Se connecter' }}
+          {{ submitLabel }}
         </button>
+
+        <p class="auth-switch">
+          Pas encore de compte ? <RouterLink to="/inscription">S'inscrire</RouterLink>
+        </p>
       </form>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
+import * as authService from '../services/auth.service';
 import AppIcon from '../components/AppIcon.vue';
+import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
+const method = ref('password');
 const phoneNumber = ref('');
 const password = ref('');
 const loading = ref(false);
@@ -86,13 +92,39 @@ const errorMessage = ref('');
 const authStore = useAuthStore();
 const router = useRouter();
 
+const submitLabel = computed(() => {
+  if (loading.value) {
+    return method.value === 'sms' ? 'Envoi du code...' : 'Connexion...';
+  }
+  return method.value === 'sms' ? 'Recevoir le code' : 'Se connecter';
+});
+
+const switchMethod = (value) => {
+  method.value = value;
+  errorMessage.value = '';
+};
+
+const goToVerification = (phone, otpCode) => {
+  router.push({ name: 'verify-phone', query: { phoneNumber: phone, otpCode } });
+};
+
 const handleSubmit = async () => {
   errorMessage.value = '';
   loading.value = true;
   try {
+    if (method.value === 'sms') {
+      const result = await authService.resendCode(phoneNumber.value);
+      goToVerification(result.phoneNumber, result.otpCode);
+      return;
+    }
+
     await authStore.login(phoneNumber.value, password.value);
-    router.push('/patients');
+    router.push(authStore.isAdmin ? '/patients' : '/accueil');
   } catch (err) {
+    if (err.response?.data?.details?.requiresVerification) {
+      goToVerification(phoneNumber.value);
+      return;
+    }
     errorMessage.value = err.response?.data?.message || err.message || 'Connexion impossible.';
   } finally {
     loading.value = false;
