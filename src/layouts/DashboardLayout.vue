@@ -5,7 +5,7 @@
         <AppIcon name="menu" />
       </button>
       <div class="brand">
-        <AppIcon name="heartbeat" />
+        <img class="brand__logo" :src="logo" alt="Save My Life" />
         Save My Life
       </div>
       <span class="avatar" aria-hidden="true">{{ initials }}</span>
@@ -15,7 +15,7 @@
 
     <aside class="sidebar" :class="{ 'is-open': sidebarOpen }">
       <div class="brand">
-        <AppIcon name="heartbeat" />
+        <img class="brand__logo" :src="logo" alt="Save My Life" />
         Save My Life
       </div>
       <nav>
@@ -60,6 +60,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import AppIcon from '../components/AppIcon.vue';
+import logo from '../assets/logo.jpeg';
 
 const authStore = useAuthStore();
 const router = useRouter();

@@ -24,7 +24,7 @@
 
     <div class="auth-brand__content">
       <div class="auth-brand__logo">
-        <AppIcon name="heartbeat" size="lg" />
+        <img :src="logo" alt="Save My Life" />
       </div>
       <h1>Save My Life</h1>
       <p>{{ tagline }}</p>
@@ -33,12 +33,12 @@
 </template>
 
 <script setup>
-import AppIcon from './AppIcon.vue';
+import logo from '../assets/logo.jpeg';
 
 defineProps({
   tagline: {
     type: String,
-    default: 'Gérez votre santé et celle de vos proches en toute sécurité, où que vous soyez.',
+    default: 'Votre santé, notre priorité.',
   },
 });
 </script>

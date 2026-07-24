@@ -1,6 +1,6 @@
 <template>
   <div class="auth-screen">
-    <AuthBrandPanel tagline="Créez votre compte pour accéder à votre espace Save My Life." />
+    <AuthBrandPanel />
 
     <section class="auth-form-panel">
       <form class="auth-form" @submit.prevent="handleSubmit">
