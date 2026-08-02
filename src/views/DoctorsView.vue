@@ -15,31 +15,72 @@
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Médecin</th>
-                <th>Spécialité</th>
-                <th>Téléphone</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="doctor in doctors" :key="doctor.id">
-                <td>
-                  <div class="patient-cell">
-                    <span class="avatar avatar--muted">{{ getInitials(doctor) }}</span>
-                    <span>Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
-                  </div>
-                </td>
-                <td>{{ doctor.speciality || '—' }}</td>
-                <td>{{ doctor.phoneNumber }}</td>
-              </tr>
-              <tr v-if="doctors.length === 0">
-                <td colspan="3" class="empty">Aucun médecin trouvé.</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="item-list">
+          <div v-for="doctor in doctors" :key="doctor.id">
+            <div class="item-row">
+              <div class="item-row__main">
+                <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
+                <span class="item-row__meta">{{ doctor.speciality || 'Médecine générale' }} — {{ doctor.phoneNumber }}</span>
+                <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
+                  {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
+                </span>
+              </div>
+              <div v-if="authStore.canManageDoctors" class="item-row__actions">
+                <button class="btn btn--ghost btn--sm" @click="toggleEdit(doctor)">
+                  <AppIcon name="edit" size="sm" /> Modifier
+                </button>
+                <button
+                  class="btn btn--ghost btn--sm"
+                  :disabled="statusBusyId === doctor.id"
+                  @click="toggleStatus(doctor)"
+                >
+                  {{ doctor.isActive ? 'Restreindre l’accès' : 'Réactiver' }}
+                </button>
+                <button class="btn btn--danger-ghost btn--sm" @click="toggleDelete(doctor)">
+                  <AppIcon name="x" size="sm" /> Supprimer
+                </button>
+              </div>
+            </div>
+
+            <div v-if="editingId === doctor.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Prénom</label>
+                  <input v-model="editForm.firstName" type="text" />
+                </div>
+                <div class="field">
+                  <label>Nom</label>
+                  <input v-model="editForm.lastName" type="text" />
+                </div>
+              </div>
+              <div class="field">
+                <label>Spécialité</label>
+                <input v-model="editForm.speciality" type="text" />
+              </div>
+              <p v-if="editError" class="alert alert--error">{{ editError }}</p>
+              <div class="form-actions">
+                <button class="btn btn--primary btn--sm" :disabled="editLoading" @click="submitEdit(doctor)">
+                  {{ editLoading ? 'Enregistrement...' : 'Enregistrer' }}
+                </button>
+                <button class="btn btn--ghost btn--sm" @click="editingId = null">Annuler</button>
+              </div>
+            </div>
+
+            <div v-if="deletingId === doctor.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+              <p style="margin-top: 0">
+                Confirmer la suppression de <strong>Dr {{ doctor.firstName }} {{ doctor.lastName }}</strong> ?
+                Cette action est irréversible.
+              </p>
+              <p v-if="deleteError" class="alert alert--error">{{ deleteError }}</p>
+              <div class="form-actions">
+                <button class="btn btn--danger-ghost btn--sm" :disabled="deleteLoading" @click="confirmDelete(doctor)">
+                  {{ deleteLoading ? 'Suppression...' : 'Confirmer la suppression' }}
+                </button>
+                <button class="btn btn--ghost btn--sm" @click="deletingId = null">Annuler</button>
+              </div>
+            </div>
+          </div>
+          <p v-if="doctors.length === 0" class="empty">Aucun médecin trouvé.</p>
         </div>
 
         <PaginationControl :page="pagination.page" :total-pages="pagination.totalPages" @change="fetchDoctors" />
@@ -103,6 +144,17 @@ const creating = ref(false);
 const createError = ref('');
 const createSuccess = ref('');
 
+const editingId = ref(null);
+const editForm = ref({ firstName: '', lastName: '', speciality: '' });
+const editLoading = ref(false);
+const editError = ref('');
+
+const statusBusyId = ref(null);
+
+const deletingId = ref(null);
+const deleteLoading = ref(false);
+const deleteError = ref('');
+
 const fetchDoctors = async (page = 1) => {
   loading.value = true;
   errorMessage.value = '';
@@ -122,8 +174,6 @@ const onSearchInput = () => {
   searchTimeout = setTimeout(() => fetchDoctors(1), 400);
 };
 
-const getInitials = (doctor) => `${doctor.firstName?.[0] || ''}${doctor.lastName?.[0] || ''}`.toUpperCase();
-
 const submit = async () => {
   creating.value = true;
   createError.value = '';
@@ -137,6 +187,57 @@ const submit = async () => {
     createError.value = err.response?.data?.message || 'Impossible d’enregistrer ce médecin.';
   } finally {
     creating.value = false;
+  }
+};
+
+const toggleEdit = (doctor) => {
+  editingId.value = editingId.value === doctor.id ? null : doctor.id;
+  deletingId.value = null;
+  editError.value = '';
+  editForm.value = { firstName: doctor.firstName, lastName: doctor.lastName, speciality: doctor.speciality || '' };
+};
+
+const submitEdit = async (doctor) => {
+  editLoading.value = true;
+  editError.value = '';
+  try {
+    await doctorService.updateDoctor(doctor.id, editForm.value);
+    editingId.value = null;
+    await fetchDoctors(pagination.value.page);
+  } catch (err) {
+    editError.value = err.response?.data?.message || 'Impossible de modifier ce médecin.';
+  } finally {
+    editLoading.value = false;
+  }
+};
+
+const toggleStatus = async (doctor) => {
+  statusBusyId.value = doctor.id;
+  try {
+    await doctorService.updateDoctorStatus(doctor.id, !doctor.isActive);
+    await fetchDoctors(pagination.value.page);
+  } finally {
+    statusBusyId.value = null;
+  }
+};
+
+const toggleDelete = (doctor) => {
+  deletingId.value = deletingId.value === doctor.id ? null : doctor.id;
+  editingId.value = null;
+  deleteError.value = '';
+};
+
+const confirmDelete = async (doctor) => {
+  deleteLoading.value = true;
+  deleteError.value = '';
+  try {
+    await doctorService.deleteDoctor(doctor.id);
+    deletingId.value = null;
+    await fetchDoctors(pagination.value.page);
+  } catch (err) {
+    deleteError.value = err.response?.data?.message || 'Impossible de supprimer ce médecin.';
+  } finally {
+    deleteLoading.value = false;
   }
 };
 

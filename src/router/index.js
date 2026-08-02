@@ -33,6 +33,7 @@ const routes = [
       { path: 'notifications', name: 'notifications', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/NotificationsView.vue') },
 
       // Admin
+      { path: 'tableau-de-bord', name: 'admin-dashboard', meta: { roles: ['admin'] }, component: () => import('../views/AdminDashboardView.vue') },
       { path: 'patients', name: 'patients', meta: { roles: ['admin'] }, component: () => import('../views/PatientsView.vue') },
       { path: 'medecins', name: 'doctors', meta: { roles: ['admin'] }, component: () => import('../views/DoctorsView.vue') },
       { path: 'administrateurs', name: 'administrators', meta: { roles: ['admin'], adminLevels: ['super_admin'] }, component: () => import('../views/AdministratorsView.vue') },
@@ -50,7 +51,7 @@ const router = createRouter({
 });
 
 const landingRouteFor = (authStore) => {
-  if (authStore.isAdmin) return { name: 'patients' };
+  if (authStore.isAdmin) return { name: 'admin-dashboard' };
   if (authStore.isDoctor) return { name: 'agenda' };
   return { name: 'home' };
 };

@@ -19,6 +19,8 @@
         Save My Life
       </div>
       <nav>
+        <p class="nav-section-label">Menu</p>
+
         <template v-if="authStore.isPatient">
           <RouterLink to="/accueil" class="nav-link" @click="sidebarOpen = false">
             <AppIcon name="home" size="sm" />
@@ -68,6 +70,10 @@
         </template>
 
         <template v-if="authStore.isAdmin">
+          <RouterLink to="/tableau-de-bord" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="home" size="sm" />
+            Tableau de bord
+          </RouterLink>
           <RouterLink to="/patients" class="nav-link" @click="sidebarOpen = false">
             <AppIcon name="users" size="sm" />
             Patients
@@ -97,7 +103,10 @@
       <div class="sidebar-footer">
         <p class="admin-name">
           <span class="avatar">{{ initials }}</span>
-          <span>{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span>
+          <span class="admin-name__meta">
+            <span class="admin-name__name">{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span>
+            <span class="role-label">{{ roleLabel }}</span>
+          </span>
         </p>
         <button class="btn btn--danger-ghost btn--block" @click="handleLogout">
           <AppIcon name="logout" size="sm" />
@@ -107,7 +116,11 @@
     </aside>
 
     <main class="content">
-      <RouterView />
+      <RouterView v-slot="{ Component }">
+        <Transition name="page-fade" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
     </main>
   </div>
 </template>
@@ -125,10 +138,24 @@ const router = useRouter();
 const sidebarOpen = ref(false);
 const unreadCount = ref(0);
 
+const ADMIN_LEVEL_LABELS = {
+  super_admin: 'Super administrateur',
+  read_only: 'Lecture seule',
+  patient_assigner: "Chargé d'attribuer les patients",
+  doctor_manager: "Chargé d'ajouter les médecins",
+};
+
 const initials = computed(() => {
   const first = authStore.user?.firstName?.[0] || '';
   const last = authStore.user?.lastName?.[0] || '';
   return (first + last).toUpperCase();
+});
+
+const roleLabel = computed(() => {
+  if (authStore.isPatient) return 'Patient';
+  if (authStore.isDoctor) return authStore.user?.speciality || 'Médecin';
+  if (authStore.isAdmin) return ADMIN_LEVEL_LABELS[authStore.user?.adminLevel] || 'Administrateur';
+  return '';
 });
 
 const handleLogout = () => {

@@ -29,3 +29,12 @@ export const updateDoctor = async (id, payload) => {
   const { data } = await api.patch(`/doctors/${id}`, payload);
   return data.data.doctor;
 };
+
+export const updateDoctorStatus = async (id, isActive) => {
+  const { data } = await api.patch(`/doctors/${id}/status`, { isActive });
+  return data.data.doctor;
+};
+
+export const deleteDoctor = async (id) => {
+  await api.delete(`/doctors/${id}`);
+};

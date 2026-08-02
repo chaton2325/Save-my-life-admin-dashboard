@@ -13,32 +13,50 @@
       <h2 class="section-title">Utilisateurs</h2>
       <div class="stat-grid">
         <div class="stat-card">
-          <p class="stat-card__value">{{ stats.users.patients }}</p>
-          <p class="stat-card__label">Patients</p>
+          <span class="stat-card__icon"><AppIcon name="users" /></span>
+          <div>
+            <p class="stat-card__value">{{ stats.users.patients }}</p>
+            <p class="stat-card__label">Patients</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-card__value">{{ stats.users.doctors }}</p>
-          <p class="stat-card__label">Médecins</p>
+          <span class="stat-card__icon"><AppIcon name="userCheck" /></span>
+          <div>
+            <p class="stat-card__value">{{ stats.users.doctors }}</p>
+            <p class="stat-card__label">Médecins</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-card__value">{{ stats.users.admins }}</p>
-          <p class="stat-card__label">Administrateurs</p>
+          <span class="stat-card__icon"><AppIcon name="userPlus" /></span>
+          <div>
+            <p class="stat-card__value">{{ stats.users.admins }}</p>
+            <p class="stat-card__label">Administrateurs</p>
+          </div>
         </div>
         <div class="stat-card">
-          <p class="stat-card__value">{{ stats.users.newThisMonth }}</p>
-          <p class="stat-card__label">Nouveaux ce mois-ci</p>
+          <span class="stat-card__icon"><AppIcon name="activity" /></span>
+          <div>
+            <p class="stat-card__value">{{ stats.users.newThisMonth }}</p>
+            <p class="stat-card__label">Nouveaux ce mois-ci</p>
+          </div>
         </div>
       </div>
 
       <h2 class="section-title">Rendez-vous</h2>
       <div class="stat-grid">
         <div class="stat-card">
-          <p class="stat-card__value">{{ stats.appointments.total }}</p>
-          <p class="stat-card__label">Total</p>
+          <span class="stat-card__icon"><AppIcon name="calendar" /></span>
+          <div>
+            <p class="stat-card__value">{{ stats.appointments.total }}</p>
+            <p class="stat-card__label">Total</p>
+          </div>
         </div>
         <div v-for="(count, status) in stats.appointments.byStatus" :key="status" class="stat-card">
-          <p class="stat-card__value">{{ count }}</p>
-          <p class="stat-card__label">{{ statusLabel(status) }}</p>
+          <span class="stat-card__icon"><AppIcon name="clock" /></span>
+          <div>
+            <p class="stat-card__value">{{ count }}</p>
+            <p class="stat-card__label">{{ statusLabel(status) }}</p>
+          </div>
         </div>
       </div>
     </template>
@@ -48,6 +66,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
+import AppIcon from '../components/AppIcon.vue';
 
 const stats = ref(null);
 const loading = ref(false);
