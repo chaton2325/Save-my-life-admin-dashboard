@@ -108,6 +108,15 @@
             <span class="role-label">{{ roleLabel }}</span>
           </span>
         </p>
+        <RouterLink
+          to="/mot-de-passe"
+          class="nav-link"
+          style="margin-bottom: var(--space-3)"
+          @click="sidebarOpen = false"
+        >
+          <AppIcon name="lock" size="sm" />
+          Changer mon mot de passe
+        </RouterLink>
         <button class="btn btn--danger-ghost btn--block" @click="handleLogout">
           <AppIcon name="logout" size="sm" />
           Déconnexion

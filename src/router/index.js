@@ -32,6 +32,9 @@ const routes = [
       // Patient + Médecin
       { path: 'notifications', name: 'notifications', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/NotificationsView.vue') },
 
+      // Commun à tous les rôles
+      { path: 'mot-de-passe', name: 'change-password', component: () => import('../views/ChangePasswordView.vue') },
+
       // Admin
       { path: 'tableau-de-bord', name: 'admin-dashboard', meta: { roles: ['admin'] }, component: () => import('../views/AdminDashboardView.vue') },
       { path: 'patients', name: 'patients', meta: { roles: ['admin'] }, component: () => import('../views/PatientsView.vue') },

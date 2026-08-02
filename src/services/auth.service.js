@@ -19,3 +19,7 @@ export const login = async ({ phoneNumber, password }) => {
   const { data } = await api.post('/auth/login', { phoneNumber, password });
   return data.data;
 };
+
+export const changePassword = async ({ currentPassword, newPassword }) => {
+  await api.patch('/auth/change-password', { currentPassword, newPassword });
+};
