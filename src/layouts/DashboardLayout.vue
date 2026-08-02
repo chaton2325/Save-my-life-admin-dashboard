@@ -19,23 +19,80 @@
         Save My Life
       </div>
       <nav>
-        <RouterLink v-if="!authStore.isAdmin" to="/accueil" class="nav-link" @click="sidebarOpen = false">
-          <AppIcon name="home" size="sm" />
-          Accueil
-        </RouterLink>
-        <RouterLink v-if="authStore.isAdmin" to="/patients" class="nav-link" @click="sidebarOpen = false">
-          <AppIcon name="users" size="sm" />
-          Patients
-        </RouterLink>
-        <RouterLink
-          v-if="authStore.isAdmin"
-          to="/administrateurs"
-          class="nav-link"
-          @click="sidebarOpen = false"
-        >
-          <AppIcon name="userPlus" size="sm" />
-          Administrateurs
-        </RouterLink>
+        <template v-if="authStore.isPatient">
+          <RouterLink to="/accueil" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="home" size="sm" />
+            Accueil
+          </RouterLink>
+          <RouterLink to="/rendez-vous" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="calendar" size="sm" />
+            Mes rendez-vous
+          </RouterLink>
+          <RouterLink to="/prendre-rendez-vous" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="plus" size="sm" />
+            Prendre rendez-vous
+          </RouterLink>
+          <RouterLink to="/ordonnances" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="fileText" size="sm" />
+            Mes ordonnances
+          </RouterLink>
+          <RouterLink to="/notifications" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="bell" size="sm" />
+            Notifications
+            <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount }}</span>
+          </RouterLink>
+        </template>
+
+        <template v-if="authStore.isDoctor">
+          <RouterLink to="/agenda" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="calendar" size="sm" />
+            Mon agenda
+          </RouterLink>
+          <RouterLink to="/demandes" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="clipboard" size="sm" />
+            Demandes de rendez-vous
+          </RouterLink>
+          <RouterLink to="/mes-disponibilites" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="clock" size="sm" />
+            Mes disponibilités
+          </RouterLink>
+          <RouterLink to="/mes-patients" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="users" size="sm" />
+            Mes patients
+          </RouterLink>
+          <RouterLink to="/notifications" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="bell" size="sm" />
+            Notifications
+            <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount }}</span>
+          </RouterLink>
+        </template>
+
+        <template v-if="authStore.isAdmin">
+          <RouterLink to="/patients" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="users" size="sm" />
+            Patients
+          </RouterLink>
+          <RouterLink to="/medecins" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="userCheck" size="sm" />
+            Médecins
+          </RouterLink>
+          <RouterLink to="/administrateurs" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="userPlus" size="sm" />
+            Administrateurs
+          </RouterLink>
+          <RouterLink to="/conflits" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="alertTriangle" size="sm" />
+            Conflits de rendez-vous
+          </RouterLink>
+          <RouterLink to="/statistiques" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="activity" size="sm" />
+            Statistiques
+          </RouterLink>
+          <RouterLink to="/journaux" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="fileText" size="sm" />
+            Journaux d'activité
+          </RouterLink>
+        </template>
       </nav>
       <div class="sidebar-footer">
         <p class="admin-name">
@@ -56,15 +113,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
+import * as notificationService from '../services/notification.service';
 import AppIcon from '../components/AppIcon.vue';
 import logo from '../assets/logo.jpeg';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const sidebarOpen = ref(false);
+const unreadCount = ref(0);
 
 const initials = computed(() => {
   const first = authStore.user?.firstName?.[0] || '';
@@ -76,4 +135,15 @@ const handleLogout = () => {
   authStore.logout();
   router.push('/login');
 };
+
+onMounted(async () => {
+  if (authStore.isPatient || authStore.isDoctor) {
+    try {
+      const result = await notificationService.getMyNotifications({ limit: 1 });
+      unreadCount.value = result.unreadCount;
+    } catch {
+      unreadCount.value = 0;
+    }
+  }
+});
 </script>

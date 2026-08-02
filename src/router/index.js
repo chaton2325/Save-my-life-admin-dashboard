@@ -15,19 +15,30 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       { path: '', redirect: '/login' },
-      { path: 'accueil', name: 'home', component: () => import('../views/PatientHomeView.vue') },
-      {
-        path: 'patients',
-        name: 'patients',
-        meta: { requiresAdmin: true },
-        component: () => import('../views/PatientsView.vue'),
-      },
-      {
-        path: 'administrateurs',
-        name: 'administrators',
-        meta: { requiresAdmin: true },
-        component: () => import('../views/AdministratorsView.vue'),
-      },
+
+      // Patient
+      { path: 'accueil', name: 'home', meta: { roles: ['patient'] }, component: () => import('../views/PatientHomeView.vue') },
+      { path: 'rendez-vous', name: 'appointments', meta: { roles: ['patient'] }, component: () => import('../views/AppointmentsView.vue') },
+      { path: 'prendre-rendez-vous', name: 'book-appointment', meta: { roles: ['patient'] }, component: () => import('../views/BookAppointmentView.vue') },
+      { path: 'ordonnances', name: 'prescriptions', meta: { roles: ['patient'] }, component: () => import('../views/PrescriptionsView.vue') },
+
+      // Médecin
+      { path: 'agenda', name: 'agenda', meta: { roles: ['medecin'] }, component: () => import('../views/AgendaView.vue') },
+      { path: 'demandes', name: 'appointment-requests', meta: { roles: ['medecin'] }, component: () => import('../views/AppointmentRequestsView.vue') },
+      { path: 'mes-disponibilites', name: 'my-availability', meta: { roles: ['medecin'] }, component: () => import('../views/MyAvailabilityView.vue') },
+      { path: 'mes-patients', name: 'my-patients', meta: { roles: ['medecin'] }, component: () => import('../views/MyPatientsView.vue') },
+      { path: 'mes-patients/:id', name: 'patient-history', meta: { roles: ['medecin'] }, component: () => import('../views/PatientHistoryView.vue') },
+
+      // Patient + Médecin
+      { path: 'notifications', name: 'notifications', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/NotificationsView.vue') },
+
+      // Admin
+      { path: 'patients', name: 'patients', meta: { roles: ['admin'] }, component: () => import('../views/PatientsView.vue') },
+      { path: 'medecins', name: 'doctors', meta: { roles: ['admin'] }, component: () => import('../views/DoctorsView.vue') },
+      { path: 'administrateurs', name: 'administrators', meta: { roles: ['admin'], adminLevels: ['super_admin'] }, component: () => import('../views/AdministratorsView.vue') },
+      { path: 'conflits', name: 'conflicts', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ConflictsView.vue') },
+      { path: 'statistiques', name: 'stats', meta: { roles: ['admin'] }, component: () => import('../views/StatsView.vue') },
+      { path: 'journaux', name: 'activity-logs', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ActivityLogView.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/login' },
@@ -38,7 +49,11 @@ const router = createRouter({
   routes,
 });
 
-const landingRouteFor = (authStore) => ({ name: authStore.isAdmin ? 'patients' : 'home' });
+const landingRouteFor = (authStore) => {
+  if (authStore.isAdmin) return { name: 'patients' };
+  if (authStore.isDoctor) return { name: 'agenda' };
+  return { name: 'home' };
+};
 
 router.beforeEach((to) => {
   const authStore = useAuthStore();
@@ -47,12 +62,19 @@ router.beforeEach((to) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' };
   }
-  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+
+  if (to.meta.roles && !to.meta.roles.includes(authStore.user?.role)) {
     return landingRouteFor(authStore);
   }
+
+  if (to.meta.adminLevels && !authStore.isSuperAdmin && !to.meta.adminLevels.includes(authStore.user?.adminLevel)) {
+    return landingRouteFor(authStore);
+  }
+
   if (authStore.isAuthenticated && (isAuthPage || to.path === '/')) {
     return landingRouteFor(authStore);
   }
+
   return true;
 });
 

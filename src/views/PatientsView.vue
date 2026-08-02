@@ -30,21 +30,45 @@
                 <th>Patient</th>
                 <th>Téléphone</th>
                 <th>Inscrit le</th>
+                <th v-if="authStore.canAssignPatients"></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="patient in patients" :key="patient.id">
-                <td>
-                  <div class="patient-cell">
-                    <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
-                    <span>{{ patient.firstName }} {{ patient.lastName }}</span>
-                  </div>
-                </td>
-                <td>{{ patient.phoneNumber }}</td>
-                <td>{{ formatDate(patient.createdAt) }}</td>
-              </tr>
+              <template v-for="patient in patients" :key="patient.id">
+                <tr>
+                  <td>
+                    <div class="patient-cell">
+                      <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
+                      <span>{{ patient.firstName }} {{ patient.lastName }}</span>
+                    </div>
+                  </td>
+                  <td>{{ patient.phoneNumber }}</td>
+                  <td>{{ formatDate(patient.createdAt) }}</td>
+                  <td v-if="authStore.canAssignPatients">
+                    <button class="btn btn--ghost btn--sm" @click="toggleAssign(patient)">
+                      Assigner un médecin
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="assigningId === patient.id">
+                  <td colspan="4">
+                    <div class="inline-form" style="margin-bottom: 0">
+                      <select v-model="selectedDoctorId" style="max-width: 280px">
+                        <option value="">Choisir un médecin...</option>
+                        <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
+                          Dr {{ doctor.firstName }} {{ doctor.lastName }} — {{ doctor.speciality || 'Général' }}
+                        </option>
+                      </select>
+                      <button class="btn btn--primary btn--sm" :disabled="!selectedDoctorId || assignLoading" @click="confirmAssign(patient)">
+                        Confirmer
+                      </button>
+                      <button class="btn btn--ghost btn--sm" @click="assigningId = null">Annuler</button>
+                    </div>
+                  </td>
+                </tr>
+              </template>
               <tr v-if="patients.length === 0">
-                <td colspan="3" class="empty">Aucun patient trouvé.</td>
+                <td colspan="4" class="empty">Aucun patient trouvé.</td>
               </tr>
             </tbody>
           </table>
@@ -63,15 +87,23 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
+import * as doctorService from '../services/doctor.service';
+import { useAuthStore } from '../store/auth.store';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 
+const authStore = useAuthStore();
 const patients = ref([]);
+const doctors = ref([]);
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });
 const search = ref('');
 const loading = ref(false);
 const errorMessage = ref('');
 let searchTimeout;
+
+const assigningId = ref(null);
+const selectedDoctorId = ref('');
+const assignLoading = ref(false);
 
 const fetchPatients = async (page = 1) => {
   loading.value = true;
@@ -103,6 +135,25 @@ const getInitials = (patient) =>
 
 const formatDate = (value) =>
   new Date(value).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const toggleAssign = async (patient) => {
+  assigningId.value = assigningId.value === patient.id ? null : patient.id;
+  selectedDoctorId.value = '';
+  if (assigningId.value && doctors.value.length === 0) {
+    const result = await doctorService.getDoctors({ limit: 100 });
+    doctors.value = result.doctors;
+  }
+};
+
+const confirmAssign = async (patient) => {
+  assignLoading.value = true;
+  try {
+    await adminService.assignPatientToDoctor(patient.id, selectedDoctorId.value);
+    assigningId.value = null;
+  } finally {
+    assignLoading.value = false;
+  }
+};
 
 onMounted(() => fetchPatients());
 </script>

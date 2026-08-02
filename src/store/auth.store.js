@@ -10,7 +10,17 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token && !!state.user,
+    isPatient: (state) => state.user?.role === 'patient',
+    isDoctor: (state) => state.user?.role === 'medecin',
     isAdmin: (state) => state.user?.role === 'admin',
+    isSuperAdmin: (state) => state.user?.role === 'admin' && state.user?.adminLevel === 'super_admin',
+    isReadOnlyAdmin: (state) => state.user?.role === 'admin' && state.user?.adminLevel === 'read_only',
+    canManageDoctors: (state) =>
+      state.user?.role === 'admin' &&
+      ['super_admin', 'doctor_manager'].includes(state.user?.adminLevel),
+    canAssignPatients: (state) =>
+      state.user?.role === 'admin' &&
+      ['super_admin', 'patient_assigner'].includes(state.user?.adminLevel),
   },
 
   actions: {
