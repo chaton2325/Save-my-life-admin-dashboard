@@ -45,6 +45,7 @@ const routes = [
       { path: 'conflits', name: 'conflicts', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ConflictsView.vue') },
       { path: 'statistiques', name: 'stats', meta: { roles: ['admin'] }, component: () => import('../views/StatsView.vue') },
       { path: 'journaux', name: 'activity-logs', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ActivityLogView.vue') },
+      { path: 'parametres', name: 'settings', meta: { roles: ['admin'] }, component: () => import('../views/SettingsView.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/login' },

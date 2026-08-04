@@ -106,6 +106,10 @@
             <AppIcon name="fileText" size="sm" />
             Journaux d'activité
           </RouterLink>
+          <RouterLink to="/parametres" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="settings" size="sm" />
+            Paramètres
+          </RouterLink>
         </template>
       </nav>
       <div class="sidebar-footer">

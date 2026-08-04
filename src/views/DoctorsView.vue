@@ -64,7 +64,9 @@
                   <label>Spécialité</label>
                   <select v-model="editForm.speciality">
                     <option value="">Médecine générale</option>
-                    <option v-for="s in SPECIALITIES" :key="s" :value="s">{{ s }}</option>
+                    <option v-for="s in specialities" :key="s.id" :value="s.name">
+                      {{ s.name }}{{ s.isActive ? '' : ' (désactivée)' }}
+                    </option>
                   </select>
                 </div>
                 <div class="field">
@@ -129,7 +131,7 @@
             <label>Spécialité</label>
             <select v-model="form.speciality">
               <option value="">Médecine générale</option>
-              <option v-for="s in SPECIALITIES" :key="s" :value="s">{{ s }}</option>
+              <option v-for="s in activeSpecialities" :key="s.id" :value="s.name">{{ s.name }}</option>
             </select>
           </div>
           <div class="field">
@@ -161,17 +163,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import * as doctorService from '../services/doctor.service';
 import * as clinicService from '../services/clinic.service';
+import * as specialityService from '../services/speciality.service';
 import { useAuthStore } from '../store/auth.store';
-import { SPECIALITIES } from '../constants/specialities';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 
 const authStore = useAuthStore();
 const doctors = ref([]);
 const clinics = ref([]);
+const specialities = ref([]);
+const activeSpecialities = computed(() => specialities.value.filter((s) => s.isActive));
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });
 const search = ref('');
 const loading = ref(false);
@@ -201,6 +205,10 @@ const editError = ref('');
 const fetchClinics = async () => {
   const result = await clinicService.getClinics({ limit: 100 });
   clinics.value = result.clinics;
+};
+
+const fetchSpecialities = async () => {
+  specialities.value = await specialityService.getSpecialities();
 };
 
 const statusBusyId = ref(null);
@@ -304,5 +312,6 @@ const confirmDelete = async (doctor) => {
 onMounted(() => {
   fetchDoctors();
   fetchClinics();
+  fetchSpecialities();
 });
 </script>
