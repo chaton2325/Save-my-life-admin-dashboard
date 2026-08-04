@@ -31,20 +31,25 @@
                   {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
                 </span>
               </div>
-              <div v-if="authStore.canManageDoctors" class="item-row__actions">
-                <button class="btn btn--ghost btn--sm" @click="toggleEdit(doctor)">
-                  <AppIcon name="edit" size="sm" /> Modifier
+              <div class="item-row__actions">
+                <button class="btn btn--ghost btn--sm" title="Voir les détails" @click="viewingDoctor = doctor">
+                  <AppIcon name="eye" size="sm" /> Voir
                 </button>
-                <button
-                  class="btn btn--ghost btn--sm"
-                  :disabled="statusBusyId === doctor.id"
-                  @click="toggleStatus(doctor)"
-                >
-                  {{ doctor.isActive ? 'Restreindre l’accès' : 'Réactiver' }}
-                </button>
-                <button class="btn btn--danger-ghost btn--sm" @click="toggleDelete(doctor)">
-                  <AppIcon name="x" size="sm" /> Supprimer
-                </button>
+                <template v-if="authStore.canManageDoctors">
+                  <button class="btn btn--ghost btn--sm" @click="toggleEdit(doctor)">
+                    <AppIcon name="edit" size="sm" /> Modifier
+                  </button>
+                  <button
+                    class="btn btn--ghost btn--sm"
+                    :disabled="statusBusyId === doctor.id"
+                    @click="toggleStatus(doctor)"
+                  >
+                    {{ doctor.isActive ? 'Restreindre l’accès' : 'Réactiver' }}
+                  </button>
+                  <button class="btn btn--danger-ghost btn--sm" @click="toggleDelete(doctor)">
+                    <AppIcon name="x" size="sm" /> Supprimer
+                  </button>
+                </template>
               </div>
             </div>
 
@@ -159,6 +164,62 @@
         </button>
       </div>
     </template>
+
+    <Modal v-if="viewingDoctor" :title="`Dr ${viewingDoctor.firstName} ${viewingDoctor.lastName}`" @close="viewingDoctor = null">
+      <dl class="profile-list">
+        <div class="profile-row">
+          <dt>Statut</dt>
+          <dd>
+            <span class="badge" :class="viewingDoctor.isActive ? 'badge--completed' : 'badge--cancelled'">
+              {{ viewingDoctor.isActive ? 'Actif' : 'Accès restreint' }}
+            </span>
+          </dd>
+        </div>
+        <div class="profile-row">
+          <dt>Spécialité</dt>
+          <dd>{{ viewingDoctor.speciality || 'Médecine générale' }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.medicalOrderNumber">
+          <dt>N° Ordre des médecins du Cameroun</dt>
+          <dd>{{ viewingDoctor.medicalOrderNumber }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.clinic">
+          <dt>Clinique</dt>
+          <dd>
+            {{ viewingDoctor.clinic.name }}<template v-if="viewingDoctor.clinic.address"> — {{ viewingDoctor.clinic.address }}</template>
+            <button class="btn btn--ghost btn--sm" style="margin-left: var(--space-2)" @click="viewClinicFromDoctor">
+              <AppIcon name="building" size="sm" /> Voir la clinique
+            </button>
+          </dd>
+        </div>
+        <div class="profile-row">
+          <dt>Téléphone</dt>
+          <dd>{{ viewingDoctor.phoneNumber }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.email">
+          <dt>Email</dt>
+          <dd>{{ viewingDoctor.email }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.gender">
+          <dt>Genre</dt>
+          <dd>{{ { M: 'Masculin', F: 'Féminin', autre: 'Autre' }[viewingDoctor.gender] || viewingDoctor.gender }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.birthDate">
+          <dt>Date de naissance</dt>
+          <dd>{{ formatDate(viewingDoctor.birthDate) }}</dd>
+        </div>
+        <div class="profile-row" v-if="viewingDoctor.address">
+          <dt>Adresse</dt>
+          <dd>{{ viewingDoctor.address }}</dd>
+        </div>
+        <div class="profile-row">
+          <dt>Inscrit le</dt>
+          <dd>{{ formatDate(viewingDoctor.createdAt) }}</dd>
+        </div>
+      </dl>
+    </Modal>
+
+    <ClinicDetailModal v-if="viewingClinic" :clinic="viewingClinic" @close="viewingClinic = null" />
   </div>
 </template>
 
@@ -170,9 +231,18 @@ import * as specialityService from '../services/speciality.service';
 import { useAuthStore } from '../store/auth.store';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
+import Modal from '../components/Modal.vue';
+import ClinicDetailModal from '../components/ClinicDetailModal.vue';
 
 const authStore = useAuthStore();
 const doctors = ref([]);
+const viewingDoctor = ref(null);
+const viewingClinic = ref(null);
+
+const viewClinicFromDoctor = () => {
+  viewingClinic.value = viewingDoctor.value.clinic;
+  viewingDoctor.value = null;
+};
 const clinics = ref([]);
 const specialities = ref([]);
 const activeSpecialities = computed(() => specialities.value.filter((s) => s.isActive));
@@ -235,6 +305,9 @@ const onSearchInput = () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => fetchDoctors(1), 400);
 };
+
+const formatDate = (value) =>
+  new Date(value).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const submit = async () => {
   creating.value = true;
