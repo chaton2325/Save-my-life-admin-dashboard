@@ -79,12 +79,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import * as doctorService from '../services/doctor.service';
 import * as appointmentService from '../services/appointment.service';
 import AppIcon from '../components/AppIcon.vue';
 
 const router = useRouter();
+const route = useRoute();
 
 const doctors = ref([]);
 const loadingDoctors = ref(false);
@@ -161,7 +162,19 @@ const submitBooking = async () => {
   }
 };
 
+const preselectFromQuery = async () => {
+  const doctorId = route.query.doctorId;
+  if (!doctorId) return;
+  try {
+    const doctor = await doctorService.getDoctor(doctorId);
+    selectDoctor(doctor);
+  } catch {
+    // Le médecin indiqué dans l'URL n'est plus disponible : on laisse la recherche normale.
+  }
+};
+
 fetchDoctors();
+preselectFromQuery();
 </script>
 
 <style scoped>

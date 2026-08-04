@@ -1,7 +1,17 @@
 import api from './api';
 
-export const getDoctors = async ({ page = 1, limit = 20, search = '', speciality = '' } = {}) => {
-  const { data } = await api.get('/doctors', { params: { page, limit, search, speciality } });
+export const getDoctors = async ({
+  page = 1,
+  limit = 20,
+  search = '',
+  speciality = '',
+  clinicId = '',
+  latitude,
+  longitude,
+} = {}) => {
+  const { data } = await api.get('/doctors', {
+    params: { page, limit, search, speciality, clinicId, latitude, longitude },
+  });
   return data.data;
 };
 

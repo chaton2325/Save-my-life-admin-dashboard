@@ -23,8 +23,7 @@
         <select v-model="adminLevel">
           <option value="super_admin">Super administrateur — accès complet</option>
           <option value="read_only">Lecture seule — consultation uniquement</option>
-          <option value="patient_assigner">Chargé d'attribuer les patients aux médecins</option>
-          <option value="doctor_manager">Chargé d'ajouter les médecins</option>
+          <option value="doctor_manager">Chargé d'ajouter les médecins et cliniques</option>
         </select>
       </div>
 

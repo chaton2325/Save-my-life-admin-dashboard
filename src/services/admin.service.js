@@ -10,11 +10,6 @@ export const appointAdmin = async (phoneNumber, adminLevel) => {
   return data.data;
 };
 
-export const assignPatientToDoctor = async (patientId, doctorId) => {
-  const { data } = await api.post(`/admin/patients/${patientId}/assign-doctor`, { doctorId });
-  return data.data.patient;
-};
-
 export const getStats = async () => {
   const { data } = await api.get('/admin/stats');
   return data.data;

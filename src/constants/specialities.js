@@ -1,0 +1,18 @@
+export const SPECIALITIES = [
+  'Médecine générale',
+  'Pédiatrie',
+  'Ophtalmologie',
+  'Cardiologie',
+  'Gynécologie',
+  'Dentisterie',
+  'Dermatologie',
+  'ORL',
+  'Neurologie',
+  'Psychiatrie',
+  'Chirurgie générale',
+  'Endocrinologie',
+  'Gastro-entérologie',
+  'Urologie',
+  'Rhumatologie',
+  'Autre',
+];

@@ -18,9 +18,6 @@ export const useAuthStore = defineStore('auth', {
     canManageDoctors: (state) =>
       state.user?.role === 'admin' &&
       ['super_admin', 'doctor_manager'].includes(state.user?.adminLevel),
-    canAssignPatients: (state) =>
-      state.user?.role === 'admin' &&
-      ['super_admin', 'patient_assigner'].includes(state.user?.adminLevel),
   },
 
   actions: {

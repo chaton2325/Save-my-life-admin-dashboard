@@ -21,11 +21,25 @@
           <dt>Statut</dt>
           <dd>Numéro vérifié</dd>
         </div>
-        <div v-if="authStore.user?.primaryDoctorId" class="profile-row">
-          <dt>Médecin référent</dt>
-          <dd>Assigné</dd>
-        </div>
       </dl>
+    </div>
+
+    <h2 class="section-title">Besoin d'un professionnel de santé ?</h2>
+    <div class="quick-link-grid">
+      <RouterLink to="/prendre-rendez-vous" class="quick-link-card">
+        <span class="quick-link-card__icon"><AppIcon name="search" /></span>
+        <span>
+          <span class="quick-link-card__label">Je sais quel médecin consulter</span>
+          <span class="quick-link-card__desc">Rechercher un médecin par nom ou spécialité</span>
+        </span>
+      </RouterLink>
+      <RouterLink to="/orientation" class="quick-link-card">
+        <span class="quick-link-card__icon"><AppIcon name="helpCircle" /></span>
+        <span>
+          <span class="quick-link-card__label">Je ne sais pas quel spécialiste consulter</span>
+          <span class="quick-link-card__desc">Décrivez votre besoin, nous vous orientons</span>
+        </span>
+      </RouterLink>
     </div>
 
     <h2 class="section-title">Compléter mes informations</h2>
@@ -83,6 +97,7 @@
 import { ref } from 'vue';
 import { useAuthStore } from '../store/auth.store';
 import * as userService from '../services/user.service';
+import AppIcon from '../components/AppIcon.vue';
 
 const authStore = useAuthStore();
 const loading = ref(false);

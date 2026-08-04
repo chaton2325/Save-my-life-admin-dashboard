@@ -21,6 +21,7 @@ const routes = [
       { path: 'rendez-vous', name: 'appointments', meta: { roles: ['patient'] }, component: () => import('../views/AppointmentsView.vue') },
       { path: 'prendre-rendez-vous', name: 'book-appointment', meta: { roles: ['patient'] }, component: () => import('../views/BookAppointmentView.vue') },
       { path: 'ordonnances', name: 'prescriptions', meta: { roles: ['patient'] }, component: () => import('../views/PrescriptionsView.vue') },
+      { path: 'orientation', name: 'orientation', meta: { roles: ['patient'] }, component: () => import('../views/OrientationView.vue') },
 
       // Médecin
       { path: 'agenda', name: 'agenda', meta: { roles: ['medecin'] }, component: () => import('../views/AgendaView.vue') },
@@ -39,6 +40,7 @@ const routes = [
       { path: 'tableau-de-bord', name: 'admin-dashboard', meta: { roles: ['admin'] }, component: () => import('../views/AdminDashboardView.vue') },
       { path: 'patients', name: 'patients', meta: { roles: ['admin'] }, component: () => import('../views/PatientsView.vue') },
       { path: 'medecins', name: 'doctors', meta: { roles: ['admin'] }, component: () => import('../views/DoctorsView.vue') },
+      { path: 'cliniques', name: 'clinics', meta: { roles: ['admin'] }, component: () => import('../views/CliniquesView.vue') },
       { path: 'administrateurs', name: 'administrators', meta: { roles: ['admin'], adminLevels: ['super_admin'] }, component: () => import('../views/AdministratorsView.vue') },
       { path: 'conflits', name: 'conflicts', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ConflictsView.vue') },
       { path: 'statistiques', name: 'stats', meta: { roles: ['admin'] }, component: () => import('../views/StatsView.vue') },

@@ -20,7 +20,13 @@
             <div class="item-row">
               <div class="item-row__main">
                 <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
-                <span class="item-row__meta">{{ doctor.speciality || 'Médecine générale' }} — {{ doctor.phoneNumber }}</span>
+                <span class="item-row__meta">
+                  {{ doctor.speciality || 'Médecine générale' }} — {{ doctor.phoneNumber }}
+                  <template v-if="doctor.clinic"> — {{ doctor.clinic.name }}</template>
+                </span>
+                <span class="item-row__meta" v-if="doctor.medicalOrderNumber">
+                  N° Ordre des médecins du Cameroun : {{ doctor.medicalOrderNumber }}
+                </span>
                 <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
                   {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
                 </span>
@@ -53,9 +59,25 @@
                   <input v-model="editForm.lastName" type="text" />
                 </div>
               </div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Spécialité</label>
+                  <select v-model="editForm.speciality">
+                    <option value="">Médecine générale</option>
+                    <option v-for="s in SPECIALITIES" :key="s" :value="s">{{ s }}</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Clinique</label>
+                  <select v-model="editForm.clinicId">
+                    <option value="">Aucune</option>
+                    <option v-for="clinic in clinics" :key="clinic.id" :value="clinic.id">{{ clinic.name }}</option>
+                  </select>
+                </div>
+              </div>
               <div class="field">
-                <label>Spécialité</label>
-                <input v-model="editForm.speciality" type="text" />
+                <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
+                <input v-model="editForm.medicalOrderNumber" type="text" />
               </div>
               <p v-if="editError" class="alert alert--error">{{ editError }}</p>
               <div class="form-actions">
@@ -105,8 +127,22 @@
           </div>
           <div class="field">
             <label>Spécialité</label>
-            <input v-model="form.speciality" type="text" placeholder="ex: Cardiologie" />
+            <select v-model="form.speciality">
+              <option value="">Médecine générale</option>
+              <option v-for="s in SPECIALITIES" :key="s" :value="s">{{ s }}</option>
+            </select>
           </div>
+          <div class="field">
+            <label>Clinique</label>
+            <select v-model="form.clinicId">
+              <option value="">Aucune (à rattacher plus tard)</option>
+              <option v-for="clinic in clinics" :key="clinic.id" :value="clinic.id">{{ clinic.name }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
+          <input v-model="form.medicalOrderNumber" type="text" placeholder="ex: ONMC-12345" />
         </div>
         <div class="field">
           <label>Mot de passe temporaire</label>
@@ -127,27 +163,45 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import * as doctorService from '../services/doctor.service';
+import * as clinicService from '../services/clinic.service';
 import { useAuthStore } from '../store/auth.store';
+import { SPECIALITIES } from '../constants/specialities';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 
 const authStore = useAuthStore();
 const doctors = ref([]);
+const clinics = ref([]);
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });
 const search = ref('');
 const loading = ref(false);
 const errorMessage = ref('');
 let searchTimeout;
 
-const form = ref({ firstName: '', lastName: '', phoneNumber: '', speciality: '', password: '' });
+const emptyForm = () => ({
+  firstName: '',
+  lastName: '',
+  phoneNumber: '',
+  speciality: '',
+  medicalOrderNumber: '',
+  clinicId: '',
+  password: '',
+});
+
+const form = ref(emptyForm());
 const creating = ref(false);
 const createError = ref('');
 const createSuccess = ref('');
 
 const editingId = ref(null);
-const editForm = ref({ firstName: '', lastName: '', speciality: '' });
+const editForm = ref({ firstName: '', lastName: '', speciality: '', medicalOrderNumber: '', clinicId: '' });
 const editLoading = ref(false);
 const editError = ref('');
+
+const fetchClinics = async () => {
+  const result = await clinicService.getClinics({ limit: 100 });
+  clinics.value = result.clinics;
+};
 
 const statusBusyId = ref(null);
 
@@ -179,9 +233,9 @@ const submit = async () => {
   createError.value = '';
   createSuccess.value = '';
   try {
-    await doctorService.registerDoctor(form.value);
+    await doctorService.registerDoctor({ ...form.value, clinicId: form.value.clinicId || null });
     createSuccess.value = 'Médecin enregistré avec succès.';
-    form.value = { firstName: '', lastName: '', phoneNumber: '', speciality: '', password: '' };
+    form.value = emptyForm();
     await fetchDoctors();
   } catch (err) {
     createError.value = err.response?.data?.message || 'Impossible d’enregistrer ce médecin.';
@@ -194,14 +248,20 @@ const toggleEdit = (doctor) => {
   editingId.value = editingId.value === doctor.id ? null : doctor.id;
   deletingId.value = null;
   editError.value = '';
-  editForm.value = { firstName: doctor.firstName, lastName: doctor.lastName, speciality: doctor.speciality || '' };
+  editForm.value = {
+    firstName: doctor.firstName,
+    lastName: doctor.lastName,
+    speciality: doctor.speciality || '',
+    medicalOrderNumber: doctor.medicalOrderNumber || '',
+    clinicId: doctor.clinicId || '',
+  };
 };
 
 const submitEdit = async (doctor) => {
   editLoading.value = true;
   editError.value = '';
   try {
-    await doctorService.updateDoctor(doctor.id, editForm.value);
+    await doctorService.updateDoctor(doctor.id, { ...editForm.value, clinicId: editForm.value.clinicId || null });
     editingId.value = null;
     await fetchDoctors(pagination.value.page);
   } catch (err) {
@@ -241,5 +301,8 @@ const confirmDelete = async (doctor) => {
   }
 };
 
-onMounted(() => fetchDoctors());
+onMounted(() => {
+  fetchDoctors();
+  fetchClinics();
+});
 </script>

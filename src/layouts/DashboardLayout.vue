@@ -38,6 +38,10 @@
             <AppIcon name="fileText" size="sm" />
             Mes ordonnances
           </RouterLink>
+          <RouterLink to="/orientation" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="helpCircle" size="sm" />
+            Quel spécialiste consulter ?
+          </RouterLink>
           <RouterLink to="/notifications" class="nav-link" @click="sidebarOpen = false">
             <AppIcon name="bell" size="sm" />
             Notifications
@@ -81,6 +85,10 @@
           <RouterLink to="/medecins" class="nav-link" @click="sidebarOpen = false">
             <AppIcon name="userCheck" size="sm" />
             Médecins
+          </RouterLink>
+          <RouterLink to="/cliniques" class="nav-link" @click="sidebarOpen = false">
+            <AppIcon name="building" size="sm" />
+            Cliniques
           </RouterLink>
           <RouterLink to="/administrateurs" class="nav-link" @click="sidebarOpen = false">
             <AppIcon name="userPlus" size="sm" />
@@ -150,8 +158,7 @@ const unreadCount = ref(0);
 const ADMIN_LEVEL_LABELS = {
   super_admin: 'Super administrateur',
   read_only: 'Lecture seule',
-  patient_assigner: "Chargé d'attribuer les patients",
-  doctor_manager: "Chargé d'ajouter les médecins",
+  doctor_manager: "Chargé d'ajouter les médecins et cliniques",
 };
 
 const initials = computed(() => {
