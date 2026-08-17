@@ -8,12 +8,14 @@
       </div>
 
       <nav aria-label="Navigation principale">
-        <p class="nav-section-label">Menu</p>
-        <RouterLink v-for="item in navItems" :key="item.to" :to="item.to" class="nav-link">
-          <AppIcon :name="item.icon" size="sm" />
-          {{ item.label }}
-          <span v-if="badgeFor(item)" class="nav-badge">{{ badgeFor(item) }}</span>
-        </RouterLink>
+        <template v-for="section in navSections" :key="section.label">
+          <p class="nav-section-label">{{ section.label }}</p>
+          <RouterLink v-for="item in section.items" :key="item.to" :to="item.to" class="nav-link">
+            <AppIcon :name="item.icon" size="sm" />
+            {{ item.label }}
+            <span v-if="badgeFor(item)" class="nav-badge">{{ badgeFor(item) }}</span>
+          </RouterLink>
+        </template>
       </nav>
 
       <div class="sidebar-footer">
@@ -109,7 +111,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as notificationService from '../services/notification.service';
-import { navItemsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../config/navigation';
+import { navSectionsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../config/navigation';
 import AppIcon from '../components/AppIcon.vue';
 import MobileTabBar from '../components/MobileTabBar.vue';
 import AppSheet from '../components/AppSheet.vue';
@@ -127,7 +129,7 @@ const ADMIN_LEVEL_LABELS = {
   doctor_manager: "Chargé d'ajouter les médecins et cliniques",
 };
 
-const navItems = computed(() => navItemsFor(authStore));
+const navSections = computed(() => navSectionsFor(authStore));
 const tabItems = computed(() => tabItemsFor(authStore));
 const moreItems = computed(() => moreItemsFor(authStore));
 const accountItems = ACCOUNT_NAV;
