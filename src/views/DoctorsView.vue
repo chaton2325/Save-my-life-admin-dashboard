@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
@@ -31,26 +31,11 @@
                   {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
                 </span>
               </div>
-              <div class="item-row__actions">
-                <button class="btn btn--ghost btn--sm" title="Voir les détails" @click="viewingDoctor = doctor">
-                  <AppIcon name="eye" size="sm" /> Voir
-                </button>
-                <template v-if="authStore.canManageDoctors">
-                  <button class="btn btn--ghost btn--sm" @click="toggleEdit(doctor)">
-                    <AppIcon name="edit" size="sm" /> Modifier
-                  </button>
-                  <button
-                    class="btn btn--ghost btn--sm"
-                    :disabled="statusBusyId === doctor.id"
-                    @click="toggleStatus(doctor)"
-                  >
-                    {{ doctor.isActive ? 'Restreindre l’accès' : 'Réactiver' }}
-                  </button>
-                  <button class="btn btn--danger-ghost btn--sm" @click="toggleDelete(doctor)">
-                    <AppIcon name="x" size="sm" /> Supprimer
-                  </button>
-                </template>
-              </div>
+              <RowActions
+                :title="`Dr ${doctor.firstName} ${doctor.lastName}`"
+                :actions="doctorActions(doctor)"
+                @select="(key) => runDoctorAction(key, doctor)"
+              />
             </div>
 
             <div v-if="editingId === doctor.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
@@ -235,6 +220,7 @@ import AppIcon from '../components/AppIcon.vue';
 import Modal from '../components/Modal.vue';
 import ClinicDetailModal from '../components/ClinicDetailModal.vue';
 import CreatePanel from '../components/CreatePanel.vue';
+import RowActions from '../components/RowActions.vue';
 
 const authStore = useAuthStore();
 const doctors = ref([]);
@@ -284,6 +270,30 @@ const fetchSpecialities = async () => {
 };
 
 const statusBusyId = ref(null);
+
+const doctorActions = (doctor) => {
+  const actions = [{ key: 'view', label: 'Voir', icon: 'eye' }];
+  if (authStore.canManageDoctors) {
+    actions.push(
+      { key: 'edit', label: 'Modifier', icon: 'edit' },
+      {
+        key: 'status',
+        label: doctor.isActive ? 'Restreindre l’accès' : 'Réactiver',
+        icon: doctor.isActive ? 'lock' : 'check',
+        disabled: statusBusyId.value === doctor.id,
+      },
+      { key: 'delete', label: 'Supprimer', icon: 'trash', danger: true }
+    );
+  }
+  return actions;
+};
+
+const runDoctorAction = (key, doctor) => {
+  if (key === 'view') viewingDoctor.value = doctor;
+  else if (key === 'edit') toggleEdit(doctor);
+  else if (key === 'status') toggleStatus(doctor);
+  else if (key === 'delete') toggleDelete(doctor);
+};
 
 const deletingId = ref(null);
 const deleteLoading = ref(false);
