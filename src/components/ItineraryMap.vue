@@ -90,4 +90,9 @@ watch(() => [props.origin, props.destination], render, { deep: true });
   overflow: hidden;
   border: 1px solid var(--color-border);
 }
+@media (max-width: 640px) {
+  .itinerary-map {
+    height: 210px;
+  }
+}
 </style>

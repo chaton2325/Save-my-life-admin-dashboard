@@ -144,4 +144,9 @@ const useCurrentPosition = () => {
   overflow: hidden;
   border: 1px solid var(--color-border);
 }
+@media (max-width: 640px) {
+  .location-picker__map {
+    height: 200px;
+  }
+}
 </style>
