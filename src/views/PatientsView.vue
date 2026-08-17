@@ -17,10 +17,7 @@
     </div>
 
     <div class="card card--flush">
-      <p v-if="loading" class="state-message">
-        <span class="spinner spinner--dark"></span>
-        Chargement...
-      </p>
+      <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="table-wrapper">
@@ -64,6 +61,7 @@
 import { ref, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
 import PaginationControl from '../components/PaginationControl.vue';
+import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
 
 const patients = ref([]);
