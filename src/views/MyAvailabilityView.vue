@@ -35,8 +35,7 @@
       </template>
     </div>
 
-    <h2 class="section-title">Ajouter un créneau</h2>
-    <div class="card card--narrow">
+    <CreatePanel title="Ajouter un créneau" trigger-label="Nouveau créneau">
       <div class="form-grid">
         <div class="field">
           <label>Jour</label>
@@ -58,11 +57,11 @@
         </div>
       </div>
       <p v-if="formError" class="alert alert--error">{{ formError }}</p>
-      <button class="btn btn--primary" :disabled="creating" @click="submit">
+      <button class="btn btn--primary btn--block" :disabled="creating" @click="submit">
         <span v-if="creating" class="spinner"></span>
         {{ creating ? 'Ajout...' : 'Ajouter le créneau' }}
       </button>
-    </div>
+    </CreatePanel>
   </div>
 </template>
 
@@ -70,6 +69,7 @@
 import { ref, onMounted } from 'vue';
 import * as availabilityService from '../services/availability.service';
 import AppIcon from '../components/AppIcon.vue';
+import CreatePanel from '../components/CreatePanel.vue';
 
 const dayLabels = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
