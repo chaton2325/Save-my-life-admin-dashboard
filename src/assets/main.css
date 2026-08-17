@@ -48,19 +48,38 @@
   --shadow-lg: 0 24px 48px -12px rgba(16, 24, 40, 0.22);
   --shadow-primary: 0 8px 20px -6px rgba(29, 78, 216, 0.4);
 
-  /* Matériaux — verre dépoli et relief tactile */
+  /* ---------------------------------------------------------------------
+     Matériaux.
+     Une seule source de lumière, en haut et légèrement à gauche : toute
+     arête supérieure s'éclaire, toute arête inférieure s'assombrit, et les
+     ombres portées tombent vers le bas. Le relief est réservé à ce qui se
+     manipule (touches, champs, rails, poignées) ; les surfaces qui ne font
+     que porter du texte restent franches.
+     --------------------------------------------------------------------- */
   --glass-blur: saturate(180%) blur(20px);
   --glass-surface: rgba(255, 255, 255, 0.72);
   --glass-surface-strong: rgba(255, 255, 255, 0.86);
   --glass-edge: rgba(255, 255, 255, 0.75);
   --hairline: 0 0 0 1px rgba(16, 24, 40, 0.05);
-  /* Arête lumineuse en haut, ombre douce en bas : la surface a une épaisseur */
-  --bevel: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(16, 24, 40, 0.05);
-  --bevel-strong: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 5px rgba(16, 24, 40, 0.16);
-  /* Creux : champs de saisie, rails, encoches */
-  --engraved: inset 0 2px 4px rgba(16, 24, 40, 0.07), inset 0 0 0 1px rgba(255, 255, 255, 0.55);
-  --pressed: inset 0 3px 7px rgba(16, 24, 40, 0.22);
-  --sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 45%, transparent 60%);
+
+  /* Ombres portées en deux temps : contact net au sol, halo ambiant large. */
+  --cast-contact: 0 1px 1px rgba(16, 24, 40, 0.18);
+  --cast-ambient: 0 8px 18px -6px rgba(16, 24, 40, 0.28);
+  --cast-contact-primary: 0 1px 1px rgba(12, 30, 80, 0.35);
+  --cast-ambient-primary: 0 7px 14px -4px rgba(29, 78, 216, 0.5), 0 16px 32px -14px rgba(16, 24, 40, 0.4);
+
+  /* Arêtes d'une touche : lumière au sommet, épaisseur sous le doigt. */
+  --rim-light: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --rim-light-strong: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  --rim-shade: inset 0 -1px 0 rgba(16, 24, 40, 0.07);
+  --rim-shade-strong: inset 0 -2px 4px rgba(10, 22, 60, 0.42);
+
+  /* Creux : champs de saisie, rails, encoches. L'arête basse extérieure
+     reste éclairée — c'est ce filet blanc qui fait lire le creux. */
+  --groove: inset 0 2px 3px rgba(16, 24, 40, 0.11), inset 0 1px 0 rgba(16, 24, 40, 0.05),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+  --pressed: inset 0 3px 6px rgba(10, 22, 60, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+  --pressed-light: inset 0 2px 4px rgba(16, 24, 40, 0.18);
 
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring: cubic-bezier(0.22, 1.2, 0.36, 1);
@@ -178,8 +197,6 @@ button {
 }
 .btn {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -200,79 +217,82 @@ button {
     color 0.18s var(--ease),
     opacity 0.18s var(--ease);
 }
-.btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.99);
-}
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* Reflet vitré : la lumière tombe du haut, comme sur une touche réelle. */
-.btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--sheen);
-  opacity: 0.9;
-  pointer-events: none;
-  transition: opacity 0.18s var(--ease);
-}
-.btn:active:not(:disabled)::before {
-  opacity: 0.35;
-}
-
+/* Touche pleine : corps dégradé + reflet de surface dans la même pile,
+   arête haute éclairée, épaisseur sous le doigt, double ombre au sol. */
 .btn--primary {
-  background: linear-gradient(180deg, #4d8bfa 0%, #1d4ed8 58%, #17399f 100%);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0) 44%),
+    linear-gradient(180deg, #5a9bff 0%, #2563eb 46%, #1a44b5 100%);
   color: #fff;
-  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.28);
+  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.35);
   box-shadow:
-    var(--shadow-primary),
-    var(--bevel-strong),
-    0 1px 2px rgba(16, 24, 40, 0.2);
+    var(--rim-light-strong),
+    var(--rim-shade-strong),
+    var(--cast-contact-primary),
+    var(--cast-ambient-primary);
 }
 .btn--primary:hover:not(:disabled) {
-  box-shadow:
-    0 12px 28px -6px rgba(29, 78, 216, 0.55),
-    var(--bevel-strong),
-    0 1px 2px rgba(16, 24, 40, 0.22);
   transform: translateY(-1px);
+  box-shadow:
+    var(--rim-light-strong),
+    var(--rim-shade-strong),
+    var(--cast-contact-primary),
+    0 10px 20px -4px rgba(29, 78, 216, 0.58),
+    0 22px 40px -16px rgba(16, 24, 40, 0.45);
 }
+/* Enfoncement : la touche descend et son ombre se referme. */
 .btn--primary:active:not(:disabled) {
-  box-shadow: var(--pressed);
+  transform: translateY(2px);
+  background-image: linear-gradient(180deg, #2f6ae0 0%, #1b47bb 100%);
+  box-shadow: var(--pressed), 0 1px 0 rgba(16, 24, 40, 0.18);
 }
 
+/* Touche claire : plastique clair, texte gravé dans la surface. */
 .btn--ghost {
-  background: linear-gradient(180deg, #ffffff 0%, #f3f6fc 100%);
+  background-image: linear-gradient(180deg, #ffffff 0%, #eef2f9 100%);
   color: var(--color-text);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid #c9d4e6;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 1px 2px rgba(16, 24, 40, 0.07);
+    var(--rim-light),
+    var(--rim-shade),
+    var(--cast-contact),
+    0 3px 6px -3px rgba(16, 24, 40, 0.2);
 }
 .btn--ghost:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffffff 0%, #eaf0fb 100%);
-  border-color: #c6d3e8;
+  background-image: linear-gradient(180deg, #ffffff 0%, #e6edf9 100%);
+  border-color: #b6c5de;
 }
 .btn--ghost:active:not(:disabled) {
-  box-shadow: inset 0 2px 5px rgba(16, 24, 40, 0.14);
+  transform: translateY(1px);
+  background-image: linear-gradient(180deg, #e8edf6 0%, #f3f6fb 100%);
+  box-shadow: var(--pressed-light);
 }
 
 .btn--danger-ghost {
-  background: linear-gradient(180deg, #ffffff 0%, #fdf3f3 100%);
+  background-image: linear-gradient(180deg, #ffffff 0%, #fbeef0 100%);
   color: var(--color-error);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid #e6cdd2;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 1px 2px rgba(16, 24, 40, 0.07);
+    var(--rim-light),
+    var(--rim-shade),
+    var(--cast-contact),
+    0 3px 6px -3px rgba(16, 24, 40, 0.2);
 }
 .btn--danger-ghost:hover:not(:disabled) {
-  background: linear-gradient(180deg, #fff5f5 0%, #fbe3e3 100%);
+  background-image: linear-gradient(180deg, #fff6f7 0%, #f8dfe2 100%);
   border-color: rgba(193, 18, 31, 0.45);
 }
 .btn--danger-ghost:active:not(:disabled) {
-  box-shadow: inset 0 2px 5px rgba(193, 18, 31, 0.18);
+  transform: translateY(1px);
+  background-image: linear-gradient(180deg, #f6dfe2 0%, #fceef0 100%);
+  box-shadow: inset 0 2px 4px rgba(120, 12, 20, 0.22);
 }
 .btn--block {
   width: 100%;
@@ -286,19 +306,21 @@ button {
 }
 
 /* Inputs */
-/* Champs « gravés » : la surface s'enfonce légèrement sous la lumière. */
+/* Champ creusé dans la surface : ombre interne au sommet, filet blanc sous
+   l'arête basse — c'est ce contraste qui fait lire le creux. */
 input,
 select,
 textarea {
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid #cdd8ea;
   border-radius: var(--radius);
   padding: 0.65rem 0.9rem;
   font-size: 0.95rem;
   width: 100%;
   font-family: inherit;
-  background: linear-gradient(180deg, #f6f8fc 0%, #ffffff 42%);
+  background-image: linear-gradient(180deg, #eef2f8 0%, #ffffff 34%);
+  background-color: #ffffff;
   color: var(--color-text);
-  box-shadow: var(--engraved);
+  box-shadow: var(--groove);
   transition:
     border-color 0.15s var(--ease),
     box-shadow 0.15s var(--ease);
@@ -314,16 +336,16 @@ textarea::placeholder {
 input:hover,
 select:hover,
 textarea:hover {
-  border-color: var(--color-border-strong);
+  border-color: #b6c5de;
 }
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  background: #ffffff;
+  background-image: linear-gradient(180deg, #e8effb 0%, #ffffff 30%);
   box-shadow:
-    inset 0 2px 4px rgba(16, 24, 40, 0.05),
+    inset 0 2px 3px rgba(29, 78, 216, 0.12),
     0 0 0 3px rgba(29, 78, 216, 0.18);
 }
 
@@ -340,9 +362,8 @@ textarea:focus {
 }
 
 /* Badges (status pills) */
+/* Étiquette de statut : information, pas commande — donc pas de relief. */
 .badge {
-  position: relative;
-  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -352,17 +373,6 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    0 1px 1px rgba(16, 24, 40, 0.07);
-}
-/* Pastille bombée : un filet de lumière sur la moitié haute. */
-.badge::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 58%);
-  pointer-events: none;
 }
 .badge::before {
   content: '';
@@ -408,10 +418,9 @@ textarea:focus {
   justify-content: space-between;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 254, 0.9) 100%);
-  box-shadow: var(--hairline), var(--bevel);
+  background: var(--color-surface);
   transition:
     border-color 0.15s var(--ease),
     box-shadow 0.15s var(--ease),
@@ -419,8 +428,8 @@ textarea:focus {
     transform 0.12s var(--ease);
 }
 .item-row:hover {
-  border-color: rgba(29, 78, 216, 0.22);
-  box-shadow: var(--hairline), var(--bevel), var(--shadow-sm);
+  border-color: rgba(29, 78, 216, 0.28);
+  box-shadow: var(--shadow-sm);
 }
 .item-row:active {
   transform: scale(0.995);
@@ -460,10 +469,10 @@ textarea:focus {
   display: flex;
   align-items: flex-start;
   gap: var(--space-4);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 100%);
-  border: 1px solid var(--glass-edge);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--hairline), var(--shadow), var(--bevel);
+  box-shadow: var(--shadow);
   padding: var(--space-5);
   transition:
     transform 0.18s var(--ease),
@@ -471,9 +480,9 @@ textarea:focus {
 }
 .stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--hairline), var(--shadow-lg), var(--bevel);
+  box-shadow: var(--shadow-lg);
 }
-/* Tuile d'icône légèrement bombée, comme une touche */
+/* Pastille d'icône : galet clair posé sur la carte */
 .stat-card__icon,
 .quick-link-card__icon,
 .action-row__icon {
@@ -483,13 +492,14 @@ textarea:focus {
   width: 44px;
   height: 44px;
   border-radius: var(--radius);
-  background: linear-gradient(180deg, #ffffff 0%, var(--color-primary-soft) 100%);
-  border: 1px solid rgba(29, 78, 216, 0.12);
+  background-image: linear-gradient(180deg, #ffffff 0%, var(--color-primary-soft) 100%);
+  border: 1px solid rgba(29, 78, 216, 0.14);
   color: var(--color-primary);
   flex-shrink: 0;
   box-shadow:
-    inset 0 1px 0 #ffffff,
-    0 1px 2px rgba(16, 24, 40, 0.1);
+    var(--rim-light),
+    inset 0 -1px 0 rgba(29, 78, 216, 0.08),
+    var(--cast-contact);
 }
 .stat-card__value {
   font-size: 1.9rem;
@@ -503,13 +513,11 @@ textarea:focus {
   font-size: 0.85rem;
 }
 
-/* Typographie gravée : un filet de lumière sous le texte, comme un tampon. */
 .section-title {
   font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.01em;
   margin: var(--space-6) 0 var(--space-3);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .section-title:first-child {
   margin-top: 0;
@@ -537,9 +545,6 @@ textarea:focus {
   border-left: 3px solid currentColor;
   font-size: 0.88rem;
   margin: 0 0 var(--space-4);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    0 1px 2px rgba(16, 24, 40, 0.06);
 }
 .alert--error {
   background: var(--color-error-bg);
@@ -569,10 +574,10 @@ textarea:focus {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.85) 100%);
-  border: 1px solid var(--glass-edge);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--hairline), var(--shadow-sm), var(--bevel);
+  box-shadow: var(--shadow-sm);
   text-decoration: none;
   color: var(--color-text);
   transition:
@@ -582,7 +587,7 @@ textarea:focus {
 }
 .quick-link-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--hairline), var(--shadow), var(--bevel);
+  box-shadow: var(--shadow);
   border-color: rgba(29, 78, 216, 0.25);
 }
 .quick-link-card:active {
@@ -621,20 +626,15 @@ textarea:focus {
   }
 }
 
-/* Cards — plaque de verre posée sur le fond lumineux */
+/* Contenu : surface franche et lisible. Le verre est réservé au châssis
+   (sidebar, tab bar, feuilles) — sur du texte il coûte du contraste. */
 .card {
   position: relative;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.86) 100%);
-  border: 1px solid var(--glass-edge);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--hairline), var(--shadow), var(--bevel);
+  box-shadow: var(--shadow);
   padding: var(--space-5);
-}
-@supports ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
-  .card {
-    -webkit-backdrop-filter: saturate(160%) blur(12px);
-    backdrop-filter: saturate(160%) blur(12px);
-  }
 }
 .card--narrow {
   max-width: 560px;
@@ -776,30 +776,27 @@ textarea:focus {
   z-index: 2;
   max-width: 380px;
 }
-/* Médaillon : plaque blanche biseautée posée sur le dégradé */
+/* Médaillon : plaque biseautée posée sur le dégradé, double arête et
+   ombre portée en deux temps (contact serré + halo). */
 .auth-brand__logo {
   position: relative;
   width: 92px;
   height: 92px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(180deg, #ffffff 0%, #eef2fa 100%);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 48%),
+    linear-gradient(180deg, #ffffff 0%, #e8eef8 100%);
   padding: var(--space-2);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: var(--space-5);
   box-shadow:
-    0 18px 34px -14px rgba(6, 18, 55, 0.65),
     inset 0 2px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -3px 8px rgba(16, 24, 40, 0.12);
+    inset 0 -3px 7px rgba(16, 24, 40, 0.14),
+    0 2px 3px rgba(6, 18, 55, 0.4),
+    0 18px 34px -14px rgba(6, 18, 55, 0.7);
   overflow: hidden;
-}
-.auth-brand__logo::after {
-  content: '';
-  position: absolute;
-  inset: 0 0 55% 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
-  pointer-events: none;
 }
 .auth-brand__logo img {
   width: 100%;
@@ -844,18 +841,20 @@ textarea:focus {
   font-size: 0.9rem;
 }
 
-/* Rail creusé + curseur en relief : on « sent » l'option enfoncée. */
+/* Glissière creusée + curseur en relief : l'option active semble posée
+   dessus, les autres semblent au fond du rail. */
 .segmented {
   display: flex;
   gap: 4px;
-  background: linear-gradient(180deg, #e7ecf6 0%, #f1f4fb 100%);
-  border: 1px solid rgba(16, 24, 40, 0.06);
+  background-image: linear-gradient(180deg, #dfe6f2 0%, #eef2f9 60%, #f3f6fb 100%);
+  border: 1px solid #c9d4e6;
   border-radius: var(--radius);
   padding: 4px;
   margin-bottom: var(--space-5);
   box-shadow:
-    inset 0 2px 5px rgba(16, 24, 40, 0.1),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+    inset 0 2px 4px rgba(16, 24, 40, 0.14),
+    inset 0 1px 0 rgba(16, 24, 40, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .segmented__option {
   flex: 1;
@@ -881,11 +880,14 @@ textarea:focus {
   color: var(--color-text);
 }
 .segmented__option.is-active {
-  background: linear-gradient(180deg, #ffffff 0%, #f5f8ff 100%);
+  background-image: linear-gradient(180deg, #ffffff 0%, #f4f7fd 100%);
   color: var(--color-primary);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
   box-shadow:
-    0 2px 5px rgba(16, 24, 40, 0.16),
-    inset 0 1px 0 #ffffff;
+    var(--rim-light),
+    var(--rim-shade),
+    var(--cast-contact),
+    0 3px 6px -2px rgba(16, 24, 40, 0.2);
 }
 
 .field-hint {
@@ -1021,10 +1023,16 @@ textarea:focus {
   color: var(--color-primary);
 }
 .nav-link.router-link-active {
-  background: linear-gradient(180deg, #4d8bfa 0%, #1d4ed8 60%, #17399f 100%);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 46%),
+    linear-gradient(180deg, #5a9bff 0%, #2563eb 48%, #1a44b5 100%);
   color: #fff;
   text-shadow: 0 1px 1px rgba(10, 22, 60, 0.3);
-  box-shadow: var(--shadow-primary), var(--bevel-strong);
+  box-shadow:
+    var(--rim-light-strong),
+    var(--rim-shade-strong),
+    var(--cast-contact-primary),
+    var(--cast-ambient-primary);
 }
 .nav-link.router-link-active .icon {
   color: #fff;
@@ -1037,7 +1045,6 @@ textarea:focus {
   color: var(--color-text-faint);
   padding: 0 var(--space-3);
   margin: var(--space-4) 0 var(--space-2);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 .nav-section-label:first-child {
   margin-top: 0;
@@ -1088,7 +1095,7 @@ textarea:focus {
   font-size: 0.74rem;
   color: var(--color-text-muted);
 }
-/* Pastille bombée, éclairée par le haut */
+/* Jeton bombé — même lumière que la bille de la tab bar */
 .avatar {
   width: 38px;
   height: 38px;
@@ -1099,22 +1106,27 @@ textarea:focus {
   font-weight: 700;
   font-size: 0.8rem;
   flex-shrink: 0;
-  background: radial-gradient(125% 125% at 50% 0%, #7db0ff 0%, #2563eb 52%, #1431a0 100%);
+  background-image:
+    radial-gradient(60% 50% at 34% 20%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, #5a9bff 0%, #2563eb 55%, #16368f 100%);
   color: #fff;
-  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.4);
+  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.45);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    inset 0 -3px 6px rgba(10, 22, 60, 0.3),
-    0 2px 5px rgba(16, 24, 40, 0.22);
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 -4px 7px rgba(8, 20, 60, 0.35),
+    var(--cast-contact),
+    0 4px 8px -3px rgba(16, 24, 40, 0.3);
 }
 .avatar--muted {
-  background: radial-gradient(125% 125% at 50% 0%, #ffffff 0%, #e9edf5 60%, #dde3ee 100%);
+  background-image:
+    radial-gradient(60% 50% at 34% 20%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, #f4f6fa 0%, #dfe4ee 100%);
   color: var(--color-text-muted);
-  text-shadow: none;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
   box-shadow:
     inset 0 1px 0 #ffffff,
-    inset 0 -2px 4px rgba(16, 24, 40, 0.08),
-    0 1px 2px rgba(16, 24, 40, 0.1);
+    inset 0 -2px 4px rgba(16, 24, 40, 0.1),
+    var(--cast-contact);
 }
 
 .content {
@@ -1256,39 +1268,37 @@ body.is-typing .fab {
 .tabbar__item--accent {
   color: var(--color-primary);
 }
-/* Bouton d'action : bille de verre bleutée, reflet en haut, ombre portée */
-.tabbar__item--accent .tabbar__icon {
+/* Bille de verre : spéculaire en haut à gauche (la lumière), lumière
+   rebondie en bas (le sol), ombre de contact serrée + halo coloré. */
+.tabbar__item--accent .tabbar__icon,
+.tabbar__item--accent.router-link-active .tabbar__icon {
   width: 46px;
   height: 46px;
   margin-top: -16px;
   border-radius: 50%;
-  background: radial-gradient(130% 130% at 50% 0%, #8dbaff 0%, #2563eb 48%, #1431a0 100%);
   color: #fff;
-  border: 3px solid rgba(255, 255, 255, 0.92);
+  border: 3px solid rgba(255, 255, 255, 0.95);
+  background-image:
+    radial-gradient(65% 55% at 34% 20%, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(90% 70% at 50% 118%, rgba(147, 197, 253, 0.65) 0%, rgba(147, 197, 253, 0) 55%),
+    linear-gradient(180deg, #5a9bff 0%, #2563eb 52%, #14318f 100%);
   box-shadow:
-    0 8px 18px -5px rgba(29, 78, 216, 0.6),
-    inset 0 2px 3px rgba(255, 255, 255, 0.55),
-    inset 0 -4px 8px rgba(10, 22, 60, 0.35);
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -5px 9px rgba(8, 20, 60, 0.42),
+    0 2px 3px rgba(12, 30, 80, 0.35),
+    0 10px 20px -6px rgba(29, 78, 216, 0.6);
 }
-.tabbar__item--accent .tabbar__icon::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  width: 22px;
-  height: 10px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
-  pointer-events: none;
+.tabbar__item--accent .tabbar__icon .icon {
+  filter: drop-shadow(0 1px 1px rgba(8, 20, 60, 0.45));
 }
 .tabbar__item--accent.router-link-active .tabbar__icon {
-  background: radial-gradient(130% 130% at 50% 0%, #8dbaff 0%, #2563eb 48%, #1431a0 100%);
-  box-shadow:
-    0 10px 22px -5px rgba(29, 78, 216, 0.7),
-    inset 0 2px 3px rgba(255, 255, 255, 0.55),
-    inset 0 -4px 8px rgba(10, 22, 60, 0.35);
   transform: translateY(-2px);
+}
+.tabbar__item--accent:active .tabbar__icon {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 3px 6px rgba(8, 20, 60, 0.5),
+    0 1px 2px rgba(12, 30, 80, 0.35);
 }
 
 .tabbar__badge {
@@ -1326,8 +1336,6 @@ body.is-typing .fab {
 /* Bouton d'action flottant (mobile) */
 .fab {
   position: fixed;
-  isolation: isolate;
-  overflow: hidden;
   right: max(var(--space-4), var(--safe-right));
   bottom: calc(var(--tabbar-height) + var(--safe-bottom) + var(--space-3));
   z-index: 40;
@@ -1337,34 +1345,31 @@ body.is-typing .fab {
   padding: 0.8rem 1.15rem;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(180deg, #4d8bfa 0%, #1d4ed8 58%, #17399f 100%);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0) 46%),
+    linear-gradient(180deg, #5a9bff 0%, #2563eb 46%, #1a44b5 100%);
   color: #fff;
   font-family: inherit;
   font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.3);
+  text-shadow: 0 1px 1px rgba(10, 22, 60, 0.35);
   cursor: pointer;
   touch-action: manipulation;
   box-shadow:
-    var(--shadow-primary),
-    var(--bevel-strong),
-    0 12px 28px -12px rgba(16, 24, 40, 0.5);
+    var(--rim-light-strong),
+    var(--rim-shade-strong),
+    var(--cast-contact-primary),
+    var(--cast-ambient-primary),
+    0 18px 32px -14px rgba(16, 24, 40, 0.5);
   transition:
     transform 0.14s var(--ease),
     box-shadow 0.14s var(--ease);
 }
-.fab::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--sheen);
-  pointer-events: none;
-}
 .fab:active {
-  transform: scale(0.96);
-  box-shadow: var(--pressed);
+  transform: translateY(2px) scale(0.98);
+  background-image: linear-gradient(180deg, #2f6ae0 0%, #1b47bb 100%);
+  box-shadow: var(--pressed), 0 1px 0 rgba(16, 24, 40, 0.18);
 }
 /* Réserve la place du bouton flottant en bas de page. */
 .fab-spacer {
@@ -1523,6 +1528,82 @@ body.is-typing .fab {
   background: var(--color-surface-hover);
   color: var(--color-primary);
 }
+/* En-tête d'identité : avatar + nom + contact sur une seule ligne, à la
+   place d'une carte de profil qui répétait ce que l'utilisateur sait déjà. */
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.identity h1 {
+  margin: 0;
+}
+.identity__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+.avatar--lg {
+  width: 54px;
+  height: 54px;
+  font-size: 1.05rem;
+}
+
+/* Section repliable : le formulaire long ne s'ouvre que si on le demande. */
+.disclosure {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+.disclosure__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--radius-lg);
+  touch-action: manipulation;
+}
+.disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+.disclosure__summary:hover {
+  background: var(--color-surface-hover);
+}
+.disclosure__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.disclosure__title {
+  font-weight: 700;
+}
+.disclosure__hint {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+.disclosure__chevron {
+  color: var(--color-text-faint);
+  transition: transform 0.2s var(--ease);
+}
+.disclosure[open] .disclosure__chevron {
+  transform: rotate(90deg);
+}
+.disclosure__body {
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
 .search-input {
   max-width: 280px;
   width: 100%;
@@ -1565,9 +1646,7 @@ body.is-typing .fab {
   letter-spacing: 0.06em;
   color: var(--color-text-muted);
   font-weight: 700;
-  background: linear-gradient(180deg, #f7f9fd 0%, #eef2f9 100%);
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 -1px 0 rgba(16, 24, 40, 0.07);
+  background: var(--color-surface-hover);
 }
 .data-table tbody tr {
   transition: background 0.12s var(--ease);
