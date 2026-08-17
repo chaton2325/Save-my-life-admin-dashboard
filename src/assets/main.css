@@ -1140,7 +1140,12 @@ textarea:focus {
 }
 
 
-/* Page transition */
+/* =============================================================================
+   Mouvement — chaque animation doit expliquer d'où vient l'élément
+   ========================================================================== */
+
+/* Changement de page : glissement dans le sens de la navigation, pour que
+   « j'avance » et « je reviens » ne se ressemblent pas. */
 .page-fade-enter-active {
   transition:
     opacity 0.2s var(--ease),
@@ -1155,6 +1160,148 @@ textarea:focus {
 }
 .page-fade-leave-to {
   opacity: 0;
+}
+
+.nav-forward-enter-active,
+.nav-back-enter-active {
+  transition:
+    opacity 0.24s var(--ease),
+    transform 0.26s var(--ease);
+}
+.nav-forward-leave-active,
+.nav-back-leave-active {
+  transition:
+    opacity 0.14s var(--ease),
+    transform 0.16s var(--ease);
+}
+.nav-forward-enter-from {
+  opacity: 0;
+  transform: translateX(26px);
+}
+.nav-forward-leave-to {
+  opacity: 0;
+  transform: translateX(-14px);
+}
+.nav-back-enter-from {
+  opacity: 0;
+  transform: translateX(-26px);
+}
+.nav-back-leave-to {
+  opacity: 0;
+  transform: translateX(14px);
+}
+
+/* Arrivée d'une liste : les lignes montent l'une après l'autre — on voit
+   que le contenu vient d'être chargé, et l'œil suit l'ordre de lecture. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+}
+.item-list > *,
+.data-table tbody tr,
+.stat-grid > *,
+.quick-link-grid > * {
+  animation: rise-in 0.3s var(--ease) both;
+}
+.item-list > *:nth-child(1),
+.data-table tbody tr:nth-child(1),
+.stat-grid > *:nth-child(1),
+.quick-link-grid > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.item-list > *:nth-child(2),
+.data-table tbody tr:nth-child(2),
+.stat-grid > *:nth-child(2),
+.quick-link-grid > *:nth-child(2) {
+  animation-delay: 35ms;
+}
+.item-list > *:nth-child(3),
+.data-table tbody tr:nth-child(3),
+.stat-grid > *:nth-child(3),
+.quick-link-grid > *:nth-child(3) {
+  animation-delay: 70ms;
+}
+.item-list > *:nth-child(4),
+.data-table tbody tr:nth-child(4),
+.stat-grid > *:nth-child(4),
+.quick-link-grid > *:nth-child(4) {
+  animation-delay: 105ms;
+}
+.item-list > *:nth-child(n + 5),
+.data-table tbody tr:nth-child(n + 5),
+.stat-grid > *:nth-child(n + 5),
+.quick-link-grid > *:nth-child(n + 5) {
+  animation-delay: 140ms;
+}
+
+/* Un message qui apparaît glisse depuis le haut : on comprend qu'il est
+   la réponse à l'action qu'on vient de faire. */
+@keyframes alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.alert {
+  animation: alert-in 0.24s var(--ease) both;
+}
+
+/* Squelettes de chargement : la page montre sa forme avant ses données. */
+@keyframes skeleton-sweep {
+  to {
+    background-position: 200% 0;
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skeleton {
+  border-radius: var(--radius-sm);
+  background-image: linear-gradient(90deg, #e9edf5 25%, #f4f7fc 50%, #e9edf5 75%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.25s linear infinite;
+}
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+.skeleton-row__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.skeleton-row__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+.skeleton-row__line {
+  height: 11px;
+}
+.skeleton-row__line--title {
+  width: 42%;
+}
+.skeleton-row__line--meta {
+  width: 72%;
+  height: 9px;
 }
 
 /* =============================================================================
@@ -1243,8 +1390,21 @@ body.is-typing .fab {
 .tabbar__item.router-link-active {
   color: var(--color-primary);
 }
+/* L'onglet qui devient actif « accuse réception » du tap. */
+@keyframes tab-pop {
+  0% {
+    transform: translateY(-2px) scale(0.86);
+  }
+  55% {
+    transform: translateY(-2px) scale(1.09);
+  }
+  100% {
+    transform: translateY(-2px) scale(1);
+  }
+}
 .tabbar__item.is-active .tabbar__icon,
 .tabbar__item.router-link-active .tabbar__icon {
+  animation: tab-pop 0.32s var(--ease-spring);
   background: linear-gradient(180deg, #ffffff 0%, var(--color-primary-soft) 100%);
   box-shadow:
     inset 0 1px 0 #ffffff,

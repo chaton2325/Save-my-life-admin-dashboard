@@ -1,5 +1,9 @@
+import { ref } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
+
+/** Sens de la dernière navigation, pour animer l'entrée de page en conséquence. */
+export const navDirection = ref('forward');
 
 const routes = [
   { path: '/login', name: 'login', component: () => import('../views/LoginView.vue') },
@@ -85,6 +89,15 @@ router.beforeEach((to) => {
   }
 
   return true;
+});
+
+// vue-router numérote les entrées d'historique : un numéro qui décroît, c'est
+// un retour arrière.
+let lastPosition = window.history.state?.position ?? 0;
+router.afterEach(() => {
+  const position = window.history.state?.position ?? 0;
+  navDirection.value = position < lastPosition ? 'back' : 'forward';
+  lastPosition = position;
 });
 
 export default router;

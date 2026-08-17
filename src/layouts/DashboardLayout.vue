@@ -45,7 +45,7 @@
 
     <main class="content">
       <RouterView v-slot="{ Component }">
-        <Transition name="page-fade" mode="out-in">
+        <Transition :name="pageTransition" mode="out-in">
           <component :is="Component" />
         </Transition>
       </RouterView>
@@ -111,6 +111,8 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as notificationService from '../services/notification.service';
+import { navDirection } from '../router';
+import { useIsMobile } from '../composables/useIsMobile';
 import { navSectionsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../config/navigation';
 import AppIcon from '../components/AppIcon.vue';
 import MobileTabBar from '../components/MobileTabBar.vue';
@@ -128,6 +130,15 @@ const ADMIN_LEVEL_LABELS = {
   read_only: 'Lecture seule',
   doctor_manager: "Chargé d'ajouter les médecins et cliniques",
 };
+
+const isMobile = useIsMobile();
+
+// Sur mobile, la page glisse dans le sens de la navigation ; sur desktop un
+// fondu suffit, un glissement horizontal y serait déroutant.
+const pageTransition = computed(() => {
+  if (!isMobile.value) return 'page-fade';
+  return navDirection.value === 'back' ? 'nav-back' : 'nav-forward';
+});
 
 const navSections = computed(() => navSectionsFor(authStore));
 const tabItems = computed(() => tabItemsFor(authStore));
