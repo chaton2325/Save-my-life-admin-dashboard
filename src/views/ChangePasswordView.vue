@@ -44,6 +44,7 @@
 <script setup>
 import { ref } from 'vue';
 import * as authService from '../services/auth.service';
+import { errorMessageOf } from '../services/api';
 import AppIcon from '../components/AppIcon.vue';
 
 const currentPassword = ref('');
@@ -81,7 +82,7 @@ const handleSubmit = async () => {
     newPassword.value = '';
     confirmPassword.value = '';
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Impossible de mettre à jour le mot de passe.';
+    errorMessage.value = errorMessageOf(err, 'Impossible de mettre à jour le mot de passe.');
   } finally {
     loading.value = false;
   }
