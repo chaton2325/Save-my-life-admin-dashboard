@@ -58,7 +58,7 @@
 
       <template v-if="recentLogs.length > 0">
         <h2 class="section-title">Activité récente</h2>
-        <div class="card">
+        <div class="card card--flush">
           <div class="item-list">
             <div v-for="log in recentLogs" :key="log.id" class="item-row">
               <div class="item-row__main">
