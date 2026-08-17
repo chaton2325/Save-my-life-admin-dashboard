@@ -534,6 +534,68 @@ textarea:focus {
   max-width: 560px;
 }
 
+/* Actions d'une ligne repliées dans une feuille (mobile) */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 0.85rem var(--space-3);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.15s var(--ease);
+}
+.action-row:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+}
+.action-row:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.action-row__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.action-row--danger {
+  color: var(--color-error);
+}
+.action-row--danger .action-row__icon {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+/* Progression d'un parcours en étapes */
+.stepper {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 var(--space-4);
+}
+.stepper__bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border);
+  transition: background 0.25s var(--ease);
+}
+.stepper__bar.is-done {
+  background: var(--color-primary);
+}
+
 /* =============================================================================
    Auth (login / inscription / vérification)
    ========================================================================== */
@@ -949,6 +1011,16 @@ textarea:focus {
   backdrop-filter: saturate(180%) blur(18px);
   border-top: 1px solid var(--color-border);
   box-shadow: 0 -10px 30px -18px rgba(16, 24, 40, 0.45);
+  transition: transform 0.26s var(--ease);
+}
+/* Masquée quand on descend dans une liste, et pendant la saisie clavier. */
+.tabbar--hidden {
+  transform: translateY(calc(100% + 10px));
+}
+body.is-typing .tabbar,
+body.is-typing .fab {
+  transform: translateY(calc(100% + 24px));
+  pointer-events: none;
 }
 
 .tabbar__item {
@@ -1001,6 +1073,14 @@ textarea:focus {
 .tabbar__item.router-link-active .tabbar__icon {
   background: var(--color-primary-soft);
   transform: translateY(-2px);
+}
+.tabbar__item.is-active .icon,
+.tabbar__item.router-link-active .icon {
+  stroke-width: 2.4;
+}
+.tabbar__item.is-active .tabbar__label,
+.tabbar__item.router-link-active .tabbar__label {
+  font-weight: 700;
 }
 .tabbar__item:active .tabbar__icon {
   transform: scale(0.9);
@@ -1365,14 +1445,21 @@ textarea:focus {
 
   /* Densité : on réduit tout ce qui fait scroller sans rien apporter */
   .page-header {
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
     gap: var(--space-3);
   }
   .page-header h1 {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
   }
   .page-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.79rem;
+  }
+  .item-list {
+    gap: 6px;
+  }
+  .empty {
+    padding: var(--space-5) var(--space-3);
+    font-size: 0.88rem;
   }
   .section-title {
     font-size: 0.98rem;
@@ -1385,6 +1472,14 @@ textarea:focus {
   }
   .card--narrow {
     max-width: none;
+  }
+  /* Les listes n'ont pas besoin d'un cadre autour de cartes déjà encadrées :
+     on supprime l'emboîtement pour gagner en largeur et en hauteur. */
+  .card--flush {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
   }
   .field {
     margin-bottom: var(--space-3);
@@ -1626,6 +1721,15 @@ textarea:focus {
   }
   .item-row__actions > * {
     width: 100%;
+  }
+  /* Action principale + menu « ⋯ » : le menu reste compact à droite. */
+  .item-row__actions--split {
+    grid-template-columns: 1fr auto;
+  }
+  .item-row__actions--split > .btn--icon {
+    width: auto;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
   }
 }
 
