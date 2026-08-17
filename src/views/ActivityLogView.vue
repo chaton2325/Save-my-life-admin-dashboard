@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
