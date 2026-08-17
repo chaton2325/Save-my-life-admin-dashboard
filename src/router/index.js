@@ -54,6 +54,8 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  // Effet application : on repart toujours en haut de l'écran, sauf retour arrière.
+  scrollBehavior: (to, from, savedPosition) => savedPosition || { top: 0 },
 });
 
 const landingRouteFor = (authStore) => {
