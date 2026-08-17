@@ -3,8 +3,12 @@
     <div class="page-header">
       <div>
         <h1>Prendre rendez-vous</h1>
-        <p class="page-subtitle">{{ stepSubtitle }}</p>
+        <p class="page-subtitle">Étape {{ stepIndex }} sur 4 — {{ stepSubtitle }}</p>
       </div>
+    </div>
+
+    <div class="stepper" role="progressbar" :aria-valuenow="stepIndex" aria-valuemin="1" aria-valuemax="4">
+      <span v-for="n in 4" :key="n" class="stepper__bar" :class="{ 'is-done': n <= stepIndex }"></span>
     </div>
 
     <!-- Étape 1 : choisir une clinique -->
@@ -166,6 +170,9 @@ const router = useRouter();
 const route = useRoute();
 
 const step = ref('clinic'); // clinic | speciality | doctor | schedule
+
+const STEP_ORDER = ['clinic', 'speciality', 'doctor', 'schedule'];
+const stepIndex = computed(() => STEP_ORDER.indexOf(step.value) + 1 || 1);
 
 const stepSubtitle = computed(() => {
   switch (step.value) {
