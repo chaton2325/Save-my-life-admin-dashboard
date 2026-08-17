@@ -26,14 +26,14 @@
             </thead>
             <tbody>
               <tr v-for="patient in patients" :key="patient.id">
-                <td>
+                <td class="td--primary">
                   <div class="patient-cell">
                     <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
                     <span>{{ patient.firstName }} {{ patient.lastName }}</span>
                   </div>
                 </td>
-                <td>{{ patient.phoneNumber }}</td>
-                <td>
+                <td data-label="Téléphone">{{ patient.phoneNumber }}</td>
+                <td class="td--actions">
                   <RouterLink :to="`/mes-patients/${patient.id}`" class="btn btn--ghost btn--sm">
                     Voir l'historique
                   </RouterLink>
