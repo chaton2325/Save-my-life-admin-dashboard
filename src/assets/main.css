@@ -208,6 +208,8 @@ button {
   font-weight: 600;
   letter-spacing: -0.005em;
   padding: 0.7rem 1.35rem;
+  /* les RouterLink stylés en bouton ne doivent pas être soulignés */
+  text-decoration: none;
   touch-action: manipulation;
   transition:
     background 0.18s var(--ease),
@@ -440,7 +442,9 @@ textarea:focus {
   align-items: flex-start;
   gap: 3px;
   min-width: 0;
-  flex: 1 1 auto;
+  /* base 0 : le texte long occupe l'espace restant au lieu de repousser
+     l'icône ou les actions à la ligne suivante */
+  flex: 1 1 0;
 }
 .item-row__main .badge {
   margin-top: 2px;
