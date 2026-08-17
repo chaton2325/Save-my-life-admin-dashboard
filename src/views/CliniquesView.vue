@@ -75,17 +75,16 @@
       </template>
     </div>
 
-    <h2 class="section-title">Enregistrer une clinique</h2>
-    <div class="card card--narrow">
+    <CreatePanel title="Enregistrer une clinique" trigger-label="Nouvelle clinique">
       <ClinicForm v-model="form" />
 
       <p v-if="createError" class="alert alert--error">{{ createError }}</p>
       <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
-      <button class="btn btn--primary" :disabled="creating" @click="submit">
+      <button class="btn btn--primary btn--block" :disabled="creating" @click="submit">
         <span v-if="creating" class="spinner"></span>
         {{ creating ? 'Enregistrement...' : 'Enregistrer la clinique' }}
       </button>
-    </div>
+    </CreatePanel>
   </div>
 </template>
 
@@ -95,6 +94,7 @@ import * as clinicService from '../services/clinic.service';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 import LocationPicker from '../components/LocationPicker.vue';
+import CreatePanel from '../components/CreatePanel.vue';
 
 // Petit sous-composant local : champs communs au formulaire de création/édition d'une clinique,
 // avec conversion texte <-> tableau pour les téléphones et services.
