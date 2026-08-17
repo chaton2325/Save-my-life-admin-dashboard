@@ -1,133 +1,38 @@
 <template>
   <div class="layout">
-    <header class="topbar">
-      <button class="btn btn--icon btn--ghost" aria-label="Ouvrir le menu" @click="sidebarOpen = true">
-        <AppIcon name="menu" />
-      </button>
+    <!-- Desktop : navigation latérale -->
+    <aside class="sidebar">
       <div class="brand">
         <img class="brand__logo" :src="logo" alt="Save My Life" />
         Save My Life
       </div>
-      <span class="avatar" aria-hidden="true">{{ initials }}</span>
-    </header>
 
-    <div v-if="sidebarOpen" class="sidebar-backdrop" @click="sidebarOpen = false"></div>
-
-    <aside class="sidebar" :class="{ 'is-open': sidebarOpen }">
-      <div class="brand">
-        <img class="brand__logo" :src="logo" alt="Save My Life" />
-        Save My Life
-      </div>
-      <nav>
+      <nav aria-label="Navigation principale">
         <p class="nav-section-label">Menu</p>
-
-        <template v-if="authStore.isPatient">
-          <RouterLink to="/accueil" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="home" size="sm" />
-            Accueil
-          </RouterLink>
-          <RouterLink to="/rendez-vous" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="calendar" size="sm" />
-            Mes rendez-vous
-          </RouterLink>
-          <RouterLink to="/prendre-rendez-vous" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="plus" size="sm" />
-            Prendre rendez-vous
-          </RouterLink>
-          <RouterLink to="/ordonnances" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="fileText" size="sm" />
-            Mes ordonnances
-          </RouterLink>
-          <RouterLink to="/orientation" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="helpCircle" size="sm" />
-            Quel spécialiste consulter ?
-          </RouterLink>
-          <RouterLink to="/notifications" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="bell" size="sm" />
-            Notifications
-            <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount }}</span>
-          </RouterLink>
-        </template>
-
-        <template v-if="authStore.isDoctor">
-          <RouterLink to="/agenda" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="calendar" size="sm" />
-            Mon agenda
-          </RouterLink>
-          <RouterLink to="/demandes" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="clipboard" size="sm" />
-            Demandes de rendez-vous
-          </RouterLink>
-          <RouterLink to="/mes-disponibilites" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="clock" size="sm" />
-            Mes disponibilités
-          </RouterLink>
-          <RouterLink to="/mes-patients" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="users" size="sm" />
-            Mes patients
-          </RouterLink>
-          <RouterLink to="/notifications" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="bell" size="sm" />
-            Notifications
-            <span v-if="unreadCount > 0" class="nav-badge">{{ unreadCount }}</span>
-          </RouterLink>
-        </template>
-
-        <template v-if="authStore.isAdmin">
-          <RouterLink to="/tableau-de-bord" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="home" size="sm" />
-            Tableau de bord
-          </RouterLink>
-          <RouterLink to="/patients" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="users" size="sm" />
-            Patients
-          </RouterLink>
-          <RouterLink to="/medecins" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="userCheck" size="sm" />
-            Médecins
-          </RouterLink>
-          <RouterLink to="/cliniques" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="building" size="sm" />
-            Cliniques
-          </RouterLink>
-          <RouterLink to="/administrateurs" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="userPlus" size="sm" />
-            Administrateurs
-          </RouterLink>
-          <RouterLink to="/conflits" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="alertTriangle" size="sm" />
-            Conflits de rendez-vous
-          </RouterLink>
-          <RouterLink to="/statistiques" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="activity" size="sm" />
-            Statistiques
-          </RouterLink>
-          <RouterLink to="/journaux" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="fileText" size="sm" />
-            Journaux d'activité
-          </RouterLink>
-          <RouterLink to="/parametres" class="nav-link" @click="sidebarOpen = false">
-            <AppIcon name="settings" size="sm" />
-            Paramètres
-          </RouterLink>
-        </template>
+        <RouterLink v-for="item in navItems" :key="item.to" :to="item.to" class="nav-link">
+          <AppIcon :name="item.icon" size="sm" />
+          {{ item.label }}
+          <span v-if="badgeFor(item)" class="nav-badge">{{ badgeFor(item) }}</span>
+        </RouterLink>
       </nav>
+
       <div class="sidebar-footer">
         <p class="admin-name">
           <span class="avatar">{{ initials }}</span>
           <span class="admin-name__meta">
-            <span class="admin-name__name">{{ authStore.user?.firstName }} {{ authStore.user?.lastName }}</span>
+            <span class="admin-name__name">{{ fullName }}</span>
             <span class="role-label">{{ roleLabel }}</span>
           </span>
         </p>
         <RouterLink
-          to="/mot-de-passe"
+          v-for="item in accountItems"
+          :key="item.to"
+          :to="item.to"
           class="nav-link"
           style="margin-bottom: var(--space-3)"
-          @click="sidebarOpen = false"
         >
-          <AppIcon name="lock" size="sm" />
-          Changer mon mot de passe
+          <AppIcon :name="item.icon" size="sm" />
+          {{ item.label }}
         </RouterLink>
         <button class="btn btn--danger-ghost btn--block" @click="handleLogout">
           <AppIcon name="logout" size="sm" />
@@ -143,20 +48,77 @@
         </Transition>
       </RouterView>
     </main>
+
+    <!-- Mobile : tab bar + feuille « Plus » -->
+    <MobileTabBar
+      :tabs="tabItems"
+      :unread-count="unreadCount"
+      :more-active="moreOpen"
+      :more-badge="moreHasUnread"
+      @more="moreOpen = true"
+    />
+
+    <AppSheet :open="moreOpen" title="Menu" @close="moreOpen = false">
+      <p class="admin-name" style="margin-bottom: var(--space-4)">
+        <span class="avatar">{{ initials }}</span>
+        <span class="admin-name__meta">
+          <span class="admin-name__name">{{ fullName }}</span>
+          <span class="role-label">{{ roleLabel }}</span>
+        </span>
+      </p>
+
+      <template v-if="moreItems.length">
+        <p class="nav-section-label">Navigation</p>
+        <RouterLink
+          v-for="item in moreItems"
+          :key="item.to"
+          :to="item.to"
+          class="nav-link"
+          @click="moreOpen = false"
+        >
+          <AppIcon :name="item.icon" size="sm" />
+          {{ item.label }}
+          <span v-if="badgeFor(item)" class="nav-badge">{{ badgeFor(item) }}</span>
+        </RouterLink>
+      </template>
+
+      <p class="nav-section-label">Compte</p>
+      <RouterLink
+        v-for="item in accountItems"
+        :key="item.to"
+        :to="item.to"
+        class="nav-link"
+        @click="moreOpen = false"
+      >
+        <AppIcon :name="item.icon" size="sm" />
+        {{ item.label }}
+      </RouterLink>
+
+      <template #footer>
+        <button class="btn btn--danger-ghost btn--block" @click="handleLogout">
+          <AppIcon name="logout" size="sm" />
+          Déconnexion
+        </button>
+      </template>
+    </AppSheet>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as notificationService from '../services/notification.service';
+import { navItemsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../config/navigation';
 import AppIcon from '../components/AppIcon.vue';
+import MobileTabBar from '../components/MobileTabBar.vue';
+import AppSheet from '../components/AppSheet.vue';
 import logo from '../assets/logo.jpeg';
 
 const authStore = useAuthStore();
 const router = useRouter();
-const sidebarOpen = ref(false);
+const route = useRoute();
+const moreOpen = ref(false);
 const unreadCount = ref(0);
 
 const ADMIN_LEVEL_LABELS = {
@@ -165,11 +127,27 @@ const ADMIN_LEVEL_LABELS = {
   doctor_manager: "Chargé d'ajouter les médecins et cliniques",
 };
 
+const navItems = computed(() => navItemsFor(authStore));
+const tabItems = computed(() => tabItemsFor(authStore));
+const moreItems = computed(() => moreItemsFor(authStore));
+const accountItems = ACCOUNT_NAV;
+
+const badgeFor = (item) =>
+  item.badge === 'notifications' && unreadCount.value > 0 ? unreadCount.value : '';
+
+const moreHasUnread = computed(
+  () => unreadCount.value > 0 && moreItems.value.some((item) => item.badge === 'notifications')
+);
+
 const initials = computed(() => {
   const first = authStore.user?.firstName?.[0] || '';
   const last = authStore.user?.lastName?.[0] || '';
   return (first + last).toUpperCase();
 });
+
+const fullName = computed(() =>
+  `${authStore.user?.firstName || ''} ${authStore.user?.lastName || ''}`.trim()
+);
 
 const roleLabel = computed(() => {
   if (authStore.isPatient) return 'Patient';
@@ -179,18 +157,26 @@ const roleLabel = computed(() => {
 });
 
 const handleLogout = () => {
+  moreOpen.value = false;
   authStore.logout();
   router.push('/login');
 };
 
-onMounted(async () => {
-  if (authStore.isPatient || authStore.isDoctor) {
-    try {
-      const result = await notificationService.getMyNotifications({ limit: 1 });
-      unreadCount.value = result.unreadCount;
-    } catch {
-      unreadCount.value = 0;
-    }
+const refreshUnreadCount = async () => {
+  if (!authStore.isPatient && !authStore.isDoctor) return;
+  try {
+    const result = await notificationService.getMyNotifications({ limit: 1 });
+    unreadCount.value = result.unreadCount;
+  } catch {
+    unreadCount.value = 0;
   }
+};
+
+// La feuille ne doit jamais survivre à un changement de page.
+watch(() => route.fullPath, () => {
+  moreOpen.value = false;
+  refreshUnreadCount();
 });
+
+onMounted(refreshUnreadCount);
 </script>
