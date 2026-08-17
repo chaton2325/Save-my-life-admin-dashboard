@@ -34,14 +34,14 @@
             </thead>
             <tbody>
               <tr v-for="patient in patients" :key="patient.id">
-                <td>
+                <td class="td--primary">
                   <div class="patient-cell">
                     <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
                     <span>{{ patient.firstName }} {{ patient.lastName }}</span>
                   </div>
                 </td>
-                <td>{{ patient.phoneNumber }}</td>
-                <td>{{ formatDate(patient.createdAt) }}</td>
+                <td data-label="Téléphone">{{ patient.phoneNumber }}</td>
+                <td data-label="Inscrit le">{{ formatDate(patient.createdAt) }}</td>
               </tr>
               <tr v-if="patients.length === 0">
                 <td colspan="3" class="empty">Aucun patient trouvé.</td>
