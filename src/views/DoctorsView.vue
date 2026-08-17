@@ -116,54 +116,55 @@
       </template>
     </div>
 
-    <template v-if="authStore.canManageDoctors">
-      <h2 class="section-title">Enregistrer un médecin</h2>
-      <div class="card card--narrow">
-        <div class="form-grid">
-          <div class="field">
-            <label>Prénom</label>
-            <input v-model="form.firstName" type="text" />
-          </div>
-          <div class="field">
-            <label>Nom</label>
-            <input v-model="form.lastName" type="text" />
-          </div>
-          <div class="field">
-            <label>Téléphone</label>
-            <input v-model="form.phoneNumber" type="tel" placeholder="+237..." />
-          </div>
-          <div class="field">
-            <label>Spécialité</label>
-            <select v-model="form.speciality">
-              <option value="">Médecine générale</option>
-              <option v-for="s in activeSpecialities" :key="s.id" :value="s.name">{{ s.name }}</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Clinique</label>
-            <select v-model="form.clinicId">
-              <option value="">Aucune (à rattacher plus tard)</option>
-              <option v-for="clinic in clinics" :key="clinic.id" :value="clinic.id">{{ clinic.name }}</option>
-            </select>
-          </div>
+    <CreatePanel
+      v-if="authStore.canManageDoctors"
+      title="Enregistrer un médecin"
+      trigger-label="Nouveau médecin"
+    >
+      <div class="form-grid">
+        <div class="field">
+          <label>Prénom</label>
+          <input v-model="form.firstName" type="text" />
         </div>
         <div class="field">
-          <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
-          <input v-model="form.medicalOrderNumber" type="text" placeholder="ex: ONMC-12345" />
+          <label>Nom</label>
+          <input v-model="form.lastName" type="text" />
         </div>
         <div class="field">
-          <label>Mot de passe temporaire</label>
-          <input v-model="form.password" type="password" minlength="6" />
+          <label>Téléphone</label>
+          <input v-model="form.phoneNumber" type="tel" placeholder="+237..." />
         </div>
-
-        <p v-if="createError" class="alert alert--error">{{ createError }}</p>
-        <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
-        <button class="btn btn--primary" :disabled="creating" @click="submit">
-          <span v-if="creating" class="spinner"></span>
-          {{ creating ? 'Enregistrement...' : 'Enregistrer le médecin' }}
-        </button>
+        <div class="field">
+          <label>Spécialité</label>
+          <select v-model="form.speciality">
+            <option value="">Médecine générale</option>
+            <option v-for="s in activeSpecialities" :key="s.id" :value="s.name">{{ s.name }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Clinique</label>
+          <select v-model="form.clinicId">
+            <option value="">Aucune (à rattacher plus tard)</option>
+            <option v-for="clinic in clinics" :key="clinic.id" :value="clinic.id">{{ clinic.name }}</option>
+          </select>
+        </div>
       </div>
-    </template>
+      <div class="field">
+        <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
+        <input v-model="form.medicalOrderNumber" type="text" placeholder="ex: ONMC-12345" />
+      </div>
+      <div class="field">
+        <label>Mot de passe temporaire</label>
+        <input v-model="form.password" type="password" minlength="6" />
+      </div>
+
+      <p v-if="createError" class="alert alert--error">{{ createError }}</p>
+      <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
+      <button class="btn btn--primary btn--block" :disabled="creating" @click="submit">
+        <span v-if="creating" class="spinner"></span>
+        {{ creating ? 'Enregistrement...' : 'Enregistrer le médecin' }}
+      </button>
+    </CreatePanel>
 
     <Modal v-if="viewingDoctor" :title="`Dr ${viewingDoctor.firstName} ${viewingDoctor.lastName}`" @close="viewingDoctor = null">
       <dl class="profile-list">
@@ -233,6 +234,7 @@ import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 import Modal from '../components/Modal.vue';
 import ClinicDetailModal from '../components/ClinicDetailModal.vue';
+import CreatePanel from '../components/CreatePanel.vue';
 
 const authStore = useAuthStore();
 const doctors = ref([]);
