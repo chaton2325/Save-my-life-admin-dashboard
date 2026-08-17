@@ -80,6 +80,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as authService from '../services/auth.service';
+import { errorMessageOf } from '../services/api';
 import AppIcon from '../components/AppIcon.vue';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
@@ -125,7 +126,7 @@ const handleSubmit = async () => {
       goToVerification(phoneNumber.value);
       return;
     }
-    errorMessage.value = err.response?.data?.message || err.message || 'Connexion impossible.';
+    errorMessage.value = errorMessageOf(err, 'Connexion impossible.');
   } finally {
     loading.value = false;
   }
