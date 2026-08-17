@@ -12,7 +12,7 @@
     </div>
 
     <div class="card card--flush">
-      <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
+      <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
@@ -127,6 +127,7 @@
 import { ref, computed, onMounted } from 'vue';
 import * as appointmentService from '../services/appointment.service';
 import PaginationControl from '../components/PaginationControl.vue';
+import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
 import Modal from '../components/Modal.vue';
 import ItineraryMap from '../components/ItineraryMap.vue';
