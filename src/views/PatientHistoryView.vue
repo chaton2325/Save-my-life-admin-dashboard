@@ -12,7 +12,7 @@
     </div>
 
     <h2 class="section-title">Comptes rendus de consultation</h2>
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loadingHistory" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <div v-else class="item-list">
         <div v-for="report in consultations" :key="report.id" class="item-row" style="align-items: flex-start">
@@ -27,7 +27,7 @@
     </div>
 
     <h2 class="section-title">Ordonnances</h2>
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loadingPrescriptions" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <div v-else class="item-list">
         <div v-for="p in prescriptions" :key="p.id" class="item-row">
