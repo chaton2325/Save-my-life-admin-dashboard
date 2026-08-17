@@ -2,6 +2,10 @@
   <div class="page">
     <div class="page-header">
       <div>
+        <RouterLink to="/mes-patients" class="page-back">
+          <AppIcon name="arrowLeft" size="sm" />
+          Mes patients
+        </RouterLink>
         <h1>{{ patientName || 'Historique du patient' }}</h1>
         <p class="page-subtitle">Historique médical et ordonnances</p>
       </div>
@@ -36,8 +40,7 @@
       </div>
     </div>
 
-    <h2 class="section-title">Nouvelle ordonnance</h2>
-    <div class="card card--narrow">
+    <CreatePanel title="Nouvelle ordonnance" trigger-label="Nouvelle ordonnance" icon="fileText">
       <div v-for="(med, index) in medications" :key="index" class="form-grid" style="margin-bottom: var(--space-3)">
         <div class="field">
           <label>Médicament</label>
@@ -72,11 +75,11 @@
 
       <p v-if="prescError" class="alert alert--error">{{ prescError }}</p>
       <p v-if="prescSuccess" class="alert alert--success">{{ prescSuccess }}</p>
-      <button class="btn btn--primary" :disabled="prescLoading" @click="submitPrescription">
+      <button class="btn btn--primary btn--block" :disabled="prescLoading" @click="submitPrescription">
         <span v-if="prescLoading" class="spinner"></span>
         {{ prescLoading ? 'Enregistrement...' : "Créer l'ordonnance" }}
       </button>
-    </div>
+    </CreatePanel>
   </div>
 </template>
 
@@ -86,6 +89,7 @@ import { useRoute } from 'vue-router';
 import * as consultationService from '../services/consultation.service';
 import * as prescriptionService from '../services/prescription.service';
 import AppIcon from '../components/AppIcon.vue';
+import CreatePanel from '../components/CreatePanel.vue';
 
 const route = useRoute();
 const patientId = route.params.id;
