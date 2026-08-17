@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as notificationService from '../services/notification.service';
@@ -162,6 +162,17 @@ const handleLogout = () => {
   router.push('/login');
 };
 
+/* Pendant la saisie, le clavier remonte la page : on efface la barre d'onglets
+   et le bouton flottant pour ne pas couvrir le champ actif. */
+const FIELD_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
+const setTyping = (value) => document.body.classList.toggle('is-typing', value);
+const onFocusIn = (event) => {
+  if (FIELD_TAGS.includes(event.target?.tagName)) setTyping(true);
+};
+const onFocusOut = (event) => {
+  if (FIELD_TAGS.includes(event.target?.tagName)) setTyping(false);
+};
+
 const refreshUnreadCount = async () => {
   if (!authStore.isPatient && !authStore.isDoctor) return;
   try {
@@ -178,5 +189,15 @@ watch(() => route.fullPath, () => {
   refreshUnreadCount();
 });
 
-onMounted(refreshUnreadCount);
+onMounted(() => {
+  refreshUnreadCount();
+  document.addEventListener('focusin', onFocusIn);
+  document.addEventListener('focusout', onFocusOut);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('focusin', onFocusIn);
+  document.removeEventListener('focusout', onFocusOut);
+  setTyping(false);
+});
 </script>
