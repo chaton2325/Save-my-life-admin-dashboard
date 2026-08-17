@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loading" class="state-message">
         <span class="spinner spinner--dark"></span>
         Chargement...
