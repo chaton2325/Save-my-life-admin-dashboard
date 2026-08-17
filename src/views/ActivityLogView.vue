@@ -15,16 +15,18 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Auteur</th>
                 <th>Action</th>
+                <th>Auteur</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="log in logs" :key="log.id">
-                <td>{{ formatDateTime(log.createdAt) }}</td>
-                <td>{{ log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : 'Système' }}</td>
-                <td>{{ actionLabel(log.action) }}</td>
+                <td class="td--primary">{{ actionLabel(log.action) }}</td>
+                <td data-label="Auteur">
+                  {{ log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : 'Système' }}
+                </td>
+                <td data-label="Date">{{ formatDateTime(log.createdAt) }}</td>
               </tr>
               <tr v-if="logs.length === 0">
                 <td colspan="3" class="empty">Aucune activité enregistrée.</td>
