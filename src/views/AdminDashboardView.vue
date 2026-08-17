@@ -50,7 +50,7 @@
         <RouterLink v-for="link in quickLinks" :key="link.to" :to="link.to" class="quick-link-card">
           <span class="quick-link-card__icon"><AppIcon :name="link.icon" /></span>
           <span>
-            <span class="quick-link-card__label" style="display: block">{{ link.label }}</span>
+            <span class="quick-link-card__label">{{ link.label }}</span>
             <span class="quick-link-card__desc">{{ link.desc }}</span>
           </span>
         </RouterLink>
