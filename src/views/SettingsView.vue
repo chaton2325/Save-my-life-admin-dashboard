@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
@@ -27,25 +27,18 @@
                   {{ speciality.isActive ? 'Active' : 'Désactivée' }}
                 </span>
               </div>
-              <div class="item-row__actions">
-                <template v-if="editingId === speciality.id">
-                  <button class="btn btn--primary btn--sm" :disabled="editLoading" @click="submitRename(speciality)">
-                    Enregistrer
-                  </button>
-                  <button class="btn btn--ghost btn--sm" @click="editingId = null">Annuler</button>
-                </template>
-                <template v-else>
-                  <button class="btn btn--ghost btn--sm" @click="startRename(speciality)">
-                    <AppIcon name="edit" size="sm" /> Renommer
-                  </button>
-                  <button class="btn btn--ghost btn--sm" :disabled="toggleBusyId === speciality.id" @click="toggleActive(speciality)">
-                    {{ speciality.isActive ? 'Désactiver' : 'Activer' }}
-                  </button>
-                  <button class="btn btn--danger-ghost btn--sm" @click="remove(speciality)">
-                    <AppIcon name="trash" size="sm" />
-                  </button>
-                </template>
+              <div v-if="editingId === speciality.id" class="item-row__actions">
+                <button class="btn btn--primary btn--sm" :disabled="editLoading" @click="submitRename(speciality)">
+                  Enregistrer
+                </button>
+                <button class="btn btn--ghost btn--sm" @click="editingId = null">Annuler</button>
               </div>
+              <RowActions
+                v-else
+                :title="speciality.name"
+                :actions="specialityActions(speciality)"
+                @select="(key) => runSpecialityAction(key, speciality)"
+              />
             </div>
             <p v-if="rowError === speciality.id" class="alert alert--error" style="margin-top: var(--space-2)">
               {{ rowErrorMessage }}
@@ -80,6 +73,7 @@ import { ref, computed, onMounted } from 'vue';
 import * as specialityService from '../services/speciality.service';
 import AppIcon from '../components/AppIcon.vue';
 import CreatePanel from '../components/CreatePanel.vue';
+import RowActions from '../components/RowActions.vue';
 
 const specialities = ref([]);
 const search = ref('');
@@ -132,6 +126,23 @@ const submitCreate = async () => {
   } finally {
     creating.value = false;
   }
+};
+
+const specialityActions = (speciality) => [
+  { key: 'rename', label: 'Renommer', icon: 'edit' },
+  {
+    key: 'toggle',
+    label: speciality.isActive ? 'Désactiver' : 'Activer',
+    icon: speciality.isActive ? 'x' : 'check',
+    disabled: toggleBusyId.value === speciality.id,
+  },
+  { key: 'delete', label: 'Supprimer', icon: 'trash', danger: true },
+];
+
+const runSpecialityAction = (key, speciality) => {
+  if (key === 'rename') startRename(speciality);
+  else if (key === 'toggle') toggleActive(speciality);
+  else if (key === 'delete') remove(speciality);
 };
 
 const startRename = (speciality) => {
