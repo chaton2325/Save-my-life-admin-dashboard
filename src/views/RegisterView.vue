@@ -80,6 +80,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import * as authService from '../services/auth.service';
+import { errorMessageOf } from '../services/api';
 import AppIcon from '../components/AppIcon.vue';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
@@ -111,7 +112,7 @@ const handleSubmit = async () => {
     });
     router.push({ name: 'verify-phone', query: { phoneNumber: verifiedPhone, otpCode } });
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Inscription impossible.';
+    errorMessage.value = errorMessageOf(err, 'Inscription impossible.');
   } finally {
     loading.value = false;
   }
