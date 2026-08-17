@@ -11,7 +11,7 @@
       </RouterLink>
     </div>
 
-    <div class="card">
+    <div class="card card--flush">
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
@@ -22,27 +22,12 @@
               <span class="item-row__meta">{{ formatDateTime(appt.scheduledAt) }} — {{ appt.reason || 'Aucun motif précisé' }}</span>
               <span class="badge" :class="`badge--${appt.status}`">{{ statusLabel(appt.status) }}</span>
             </div>
-            <div class="item-row__actions">
-              <button
-                v-if="['pending', 'confirmed'].includes(appt.status) && appt.doctor?.clinic"
-                class="btn btn--ghost btn--sm"
-                @click="openItinerary(appt)"
-              >
-                <AppIcon name="mapPin" size="sm" /> Itinéraire
-              </button>
-              <template v-if="appt.status === 'pending'">
-                <button class="btn btn--ghost btn--sm" @click="startEdit(appt)">
-                  <AppIcon name="edit" size="sm" /> Modifier
-                </button>
-              </template>
-              <button
-                v-if="['pending', 'confirmed'].includes(appt.status)"
-                class="btn btn--danger-ghost btn--sm"
-                @click="startCancel(appt)"
-              >
-                <AppIcon name="x" size="sm" /> Annuler
-              </button>
-            </div>
+            <RowActions
+              v-if="appointmentActions(appt).length"
+              :title="`Dr ${appt.doctor?.firstName} ${appt.doctor?.lastName}`"
+              :actions="appointmentActions(appt)"
+              @select="(key) => runAppointmentAction(key, appt)"
+            />
           </div>
           <p v-if="appointments.length === 0" class="empty">Aucun rendez-vous pour le moment.</p>
         </div>
@@ -145,6 +130,7 @@ import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
 import Modal from '../components/Modal.vue';
 import ItineraryMap from '../components/ItineraryMap.vue';
+import RowActions from '../components/RowActions.vue';
 import { haversineKm, googleMapsDirectionsUrl } from '../utils/geo';
 
 const appointments = ref([]);
@@ -210,6 +196,21 @@ const statusLabels = {
   completed: 'Terminé',
 };
 const statusLabel = (status) => statusLabels[status] || status;
+
+const appointmentActions = (appt) => {
+  const actions = [];
+  const open = ['pending', 'confirmed'].includes(appt.status);
+  if (open && appt.doctor?.clinic) actions.push({ key: 'itinerary', label: 'Itinéraire', icon: 'mapPin' });
+  if (appt.status === 'pending') actions.push({ key: 'edit', label: 'Modifier', icon: 'edit' });
+  if (open) actions.push({ key: 'cancel', label: 'Annuler', icon: 'x', danger: true });
+  return actions;
+};
+
+const runAppointmentAction = (key, appt) => {
+  if (key === 'itinerary') openItinerary(appt);
+  else if (key === 'edit') startEdit(appt);
+  else if (key === 'cancel') startCancel(appt);
+};
 
 const formatDateTime = (value) =>
   new Date(value).toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
