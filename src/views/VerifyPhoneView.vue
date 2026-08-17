@@ -53,6 +53,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as authService from '../services/auth.service';
+import { errorMessageOf } from '../services/api';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
 const route = useRoute();
@@ -73,7 +74,7 @@ const handleResend = async () => {
     const result = await authService.resendCode(phoneNumber.value);
     displayedCode.value = result.otpCode;
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Impossible de renvoyer le code.';
+    errorMessage.value = errorMessageOf(err, 'Impossible de renvoyer le code.');
   } finally {
     resending.value = false;
   }
@@ -90,7 +91,7 @@ const handleSubmit = async () => {
     authStore.setSession(user, token);
     router.push(authStore.isAdmin ? '/patients' : '/accueil');
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Code invalide.';
+    errorMessage.value = errorMessageOf(err, 'Code invalide.');
   } finally {
     loading.value = false;
   }
