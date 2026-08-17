@@ -56,19 +56,22 @@
       </template>
     </div>
 
-    <h2 class="section-title">Ajouter une spécialité</h2>
-    <div class="card card--narrow">
+    <CreatePanel title="Ajouter une spécialité" trigger-label="Nouvelle spécialité">
       <div class="field">
         <label>Nom de la spécialité</label>
         <input v-model="newName" type="text" placeholder="ex: Ostéopathie" @keyup.enter="submitCreate" />
       </div>
       <p v-if="createError" class="alert alert--error">{{ createError }}</p>
       <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
-      <button class="btn btn--primary" :disabled="!newName.trim() || creating" @click="submitCreate">
+      <button
+        class="btn btn--primary btn--block"
+        :disabled="!newName.trim() || creating"
+        @click="submitCreate"
+      >
         <span v-if="creating" class="spinner"></span>
         {{ creating ? 'Ajout...' : 'Ajouter la spécialité' }}
       </button>
-    </div>
+    </CreatePanel>
   </div>
 </template>
 
@@ -76,6 +79,7 @@
 import { ref, computed, onMounted } from 'vue';
 import * as specialityService from '../services/speciality.service';
 import AppIcon from '../components/AppIcon.vue';
+import CreatePanel from '../components/CreatePanel.vue';
 
 const specialities = ref([]);
 const search = ref('');
