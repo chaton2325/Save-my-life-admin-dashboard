@@ -12,7 +12,7 @@
     </div>
 
     <div class="card card--flush">
-      <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
+      <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
@@ -92,6 +92,7 @@
 import { ref, onMounted, defineComponent, h } from 'vue';
 import * as clinicService from '../services/clinic.service';
 import PaginationControl from '../components/PaginationControl.vue';
+import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
 import LocationPicker from '../components/LocationPicker.vue';
 import CreatePanel from '../components/CreatePanel.vue';
