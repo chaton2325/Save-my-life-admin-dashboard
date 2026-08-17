@@ -18,6 +18,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Pas de réponse du tout : serveur éteint, coupure réseau, DNS...
+    // Sans ça, l'écran affiche le « Network Error » brut d'axios.
+    if (!error.response && error.code !== 'ERR_CANCELED') {
+      error.message =
+        error.code === 'ECONNABORTED'
+          ? 'Le serveur met trop de temps à répondre. Réessayez dans un instant.'
+          : 'Serveur injoignable. Vérifiez votre connexion internet, puis réessayez.';
+    }
+
     if (error.response?.status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
@@ -28,5 +37,13 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Message à afficher pour une erreur d'API.
+ * Le message du serveur prime ; sans réponse du tout, on explique la panne
+ * réseau plutôt que d'afficher un message générique qui masque la cause.
+ */
+export const errorMessageOf = (error, fallback) =>
+  error?.response?.data?.message || (error && !error.response ? error.message : null) || fallback;
 
 export default api;
