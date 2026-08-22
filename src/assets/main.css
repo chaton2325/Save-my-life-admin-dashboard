@@ -967,6 +967,16 @@ textarea:focus {
 .auth-switch a:hover {
   text-decoration: underline;
 }
+.auth-legal {
+  margin: var(--space-2) 0 0;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+}
+.auth-legal a {
+  color: inherit;
+  text-decoration: underline;
+}
 
 /* =============================================================================
    App shell (layout)

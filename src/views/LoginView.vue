@@ -70,6 +70,9 @@
         <p class="auth-switch">
           Pas encore de compte ? <RouterLink to="/inscription">S'inscrire</RouterLink>
         </p>
+        <p class="auth-legal">
+          <RouterLink to="/politique-de-confidentialite">Politique de confidentialité</RouterLink>
+        </p>
       </form>
     </section>
   </div>

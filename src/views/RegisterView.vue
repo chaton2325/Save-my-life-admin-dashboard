@@ -71,6 +71,10 @@
         </button>
 
         <p class="auth-switch">Déjà inscrit ? <RouterLink to="/login">Se connecter</RouterLink></p>
+        <p class="auth-legal">
+          En créant un compte, vous acceptez notre
+          <RouterLink to="/politique-de-confidentialite">politique de confidentialité</RouterLink>.
+        </p>
       </form>
     </section>
   </div>

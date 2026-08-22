@@ -14,6 +14,11 @@ const routes = [
     component: () => import('../views/VerifyPhoneView.vue'),
   },
   {
+    path: '/politique-de-confidentialite',
+    name: 'privacy-policy',
+    component: () => import('../views/PrivacyPolicyView.vue'),
+  },
+  {
     path: '/',
     component: () => import('../layouts/DashboardLayout.vue'),
     meta: { requiresAuth: true },
