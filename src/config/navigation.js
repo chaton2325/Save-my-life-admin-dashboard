@@ -56,6 +56,28 @@ const PATIENT_NAV = [
     short: 'Orientation',
     section: 'Suivi',
   },
+  {
+    to: '/passeport',
+    icon: 'heartbeat',
+    label: 'Passeport Santé',
+    short: 'Passeport',
+    section: 'Suivi',
+  },
+  {
+    to: '/mes-urgences',
+    icon: 'alertTriangle',
+    label: 'Mes urgences',
+    short: 'Urgences',
+    section: 'Suivi',
+  },
+  {
+    to: '/messagerie',
+    icon: 'messageCircle',
+    label: 'Messagerie',
+    short: 'Messages',
+    section: 'Suivi',
+    badge: 'messages',
+  },
 ];
 
 const DOCTOR_NAV = [
@@ -91,6 +113,14 @@ const DOCTOR_NAV = [
     label: 'Mes disponibilités',
     short: 'Dispos',
     section: 'Mon organisation',
+  },
+  {
+    to: '/messagerie',
+    icon: 'messageCircle',
+    label: 'Messagerie',
+    short: 'Messages',
+    section: 'Mon organisation',
+    badge: 'messages',
   },
 ];
 
@@ -137,6 +167,21 @@ const ADMIN_NAV = [
     label: 'Paramètres',
     short: 'Réglages',
     section: 'Administration',
+  },
+  {
+    to: '/urgences',
+    icon: 'alertTriangle',
+    label: 'Urgences SOS',
+    short: 'Urgences',
+    section: 'Pilotage',
+  },
+  {
+    to: '/support',
+    icon: 'messageCircle',
+    label: 'Messagerie',
+    short: 'Messages',
+    section: 'Pilotage',
+    badge: 'messages',
   },
 ];
 

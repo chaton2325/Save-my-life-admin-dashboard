@@ -13,11 +13,10 @@
       </div>
     </div>
 
-    <button class="btn btn--danger btn--block" @click="callEmergencyContact">
+    <RouterLink to="/urgence" class="btn btn--danger btn--block">
       <AppIcon name="alertTriangle" />
-      {{ authStore.user?.emergencyContactPhone ? `Urgence — Appeler ${authStore.user.emergencyContactName || 'mon contact'}` : 'Urgence — Ajouter un contact d\'urgence' }}
-    </button>
-    <p v-if="emergencyHint" class="alert alert--warning">{{ emergencyHint }}</p>
+      URGENCE
+    </RouterLink>
 
     <h2 class="section-title">Besoin d'un professionnel de santé ?</h2>
     <div class="quick-link-grid">
@@ -38,7 +37,7 @@
     </div>
 
     <h2 class="section-title">Mon profil</h2>
-    <details ref="profileDisclosureEl" class="disclosure card--narrow">
+    <details class="disclosure card--narrow">
       <summary class="disclosure__summary">
         <span class="quick-link-card__icon"><AppIcon name="user" /></span>
         <span class="disclosure__text">
@@ -119,24 +118,6 @@ const authStore = useAuthStore();
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
-const emergencyHint = ref('');
-const profileDisclosureEl = ref(null);
-
-// Appelle directement le contact d'urgence du patient. S'il n'en a pas encore
-// renseigné, on ouvre le formulaire de profil au lieu d'échouer silencieusement.
-const callEmergencyContact = () => {
-  const phone = authStore.user?.emergencyContactPhone;
-  if (phone) {
-    emergencyHint.value = '';
-    window.location.href = `tel:${phone.replace(/\s+/g, '')}`;
-    return;
-  }
-  emergencyHint.value = "Ajoutez d'abord un contact d'urgence ci-dessous pour pouvoir l'appeler en un geste.";
-  if (profileDisclosureEl.value) {
-    profileDisclosureEl.value.open = true;
-    profileDisclosureEl.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-};
 
 const form = ref({
   email: authStore.user?.email || '',
@@ -177,7 +158,6 @@ const handleSubmit = async () => {
     const user = await userService.updateMe(payload);
     authStore.setSession(user, authStore.token);
     successMessage.value = 'Informations mises à jour.';
-    if (user.emergencyContactPhone) emergencyHint.value = '';
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Impossible de mettre à jour vos informations.';
   } finally {

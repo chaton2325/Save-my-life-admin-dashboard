@@ -111,6 +111,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.store';
 import * as notificationService from '../services/notification.service';
+import * as messageService from '../services/message.service';
 import { navDirection } from '../router';
 import { useIsMobile } from '../composables/useIsMobile';
 import { navSectionsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../config/navigation';
@@ -124,6 +125,7 @@ const router = useRouter();
 const route = useRoute();
 const moreOpen = ref(false);
 const unreadCount = ref(0);
+const messageUnreadCount = ref(0);
 
 const ADMIN_LEVEL_LABELS = {
   super_admin: 'Super administrateur',
@@ -145,11 +147,18 @@ const tabItems = computed(() => tabItemsFor(authStore));
 const moreItems = computed(() => moreItemsFor(authStore));
 const accountItems = ACCOUNT_NAV;
 
-const badgeFor = (item) =>
-  item.badge === 'notifications' && unreadCount.value > 0 ? unreadCount.value : '';
+const badgeFor = (item) => {
+  if (item.badge === 'notifications' && unreadCount.value > 0) return unreadCount.value;
+  if (item.badge === 'messages' && messageUnreadCount.value > 0) return messageUnreadCount.value;
+  return '';
+};
 
-const moreHasUnread = computed(
-  () => unreadCount.value > 0 && moreItems.value.some((item) => item.badge === 'notifications')
+const moreHasUnread = computed(() =>
+  moreItems.value.some(
+    (item) =>
+      (item.badge === 'notifications' && unreadCount.value > 0) ||
+      (item.badge === 'messages' && messageUnreadCount.value > 0)
+  )
 );
 
 const initials = computed(() => {
@@ -196,14 +205,26 @@ const refreshUnreadCount = async () => {
   }
 };
 
+const refreshMessageUnreadCount = async () => {
+  try {
+    messageUnreadCount.value = authStore.isAdmin
+      ? await messageService.getAdminUnreadCount()
+      : await messageService.getMyUnreadCount();
+  } catch {
+    messageUnreadCount.value = 0;
+  }
+};
+
 // La feuille ne doit jamais survivre à un changement de page.
 watch(() => route.fullPath, () => {
   moreOpen.value = false;
   refreshUnreadCount();
+  refreshMessageUnreadCount();
 });
 
 onMounted(() => {
   refreshUnreadCount();
+  refreshMessageUnreadCount();
   document.addEventListener('focusin', onFocusIn);
   document.addEventListener('focusout', onFocusOut);
 });

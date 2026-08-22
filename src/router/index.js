@@ -31,6 +31,9 @@ const routes = [
       { path: 'prendre-rendez-vous', name: 'book-appointment', meta: { roles: ['patient'] }, component: () => import('../views/BookAppointmentView.vue') },
       { path: 'ordonnances', name: 'prescriptions', meta: { roles: ['patient'] }, component: () => import('../views/PrescriptionsView.vue') },
       { path: 'orientation', name: 'orientation', meta: { roles: ['patient'] }, component: () => import('../views/OrientationView.vue') },
+      { path: 'urgence', name: 'sos', meta: { roles: ['patient'] }, component: () => import('../views/SosView.vue') },
+      { path: 'mes-urgences', name: 'sos-history', meta: { roles: ['patient'] }, component: () => import('../views/SosHistoryView.vue') },
+      { path: 'passeport', name: 'passport', meta: { roles: ['patient'] }, component: () => import('../views/PassportView.vue') },
 
       // Médecin
       { path: 'agenda', name: 'agenda', meta: { roles: ['medecin'] }, component: () => import('../views/AgendaView.vue') },
@@ -41,6 +44,7 @@ const routes = [
 
       // Patient + Médecin
       { path: 'notifications', name: 'notifications', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/NotificationsView.vue') },
+      { path: 'messagerie', name: 'messages', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/MessagesView.vue') },
 
       // Commun à tous les rôles
       { path: 'mot-de-passe', name: 'change-password', component: () => import('../views/ChangePasswordView.vue') },
@@ -55,6 +59,8 @@ const routes = [
       { path: 'statistiques', name: 'stats', meta: { roles: ['admin'] }, component: () => import('../views/StatsView.vue') },
       { path: 'journaux', name: 'activity-logs', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ActivityLogView.vue') },
       { path: 'parametres', name: 'settings', meta: { roles: ['admin'] }, component: () => import('../views/SettingsView.vue') },
+      { path: 'urgences', name: 'sos-admin', meta: { roles: ['admin'] }, component: () => import('../views/SosAdminView.vue') },
+      { path: 'support', name: 'support-admin', meta: { roles: ['admin'] }, component: () => import('../views/MessagesAdminView.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/login' },
