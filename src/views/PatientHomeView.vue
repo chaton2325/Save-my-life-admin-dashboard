@@ -177,6 +177,7 @@ const handleSubmit = async () => {
     const user = await userService.updateMe(payload);
     authStore.setSession(user, authStore.token);
     successMessage.value = 'Informations mises à jour.';
+    if (user.emergencyContactPhone) emergencyHint.value = '';
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Impossible de mettre à jour vos informations.';
   } finally {
