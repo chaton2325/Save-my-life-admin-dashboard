@@ -59,12 +59,33 @@
           </div>
         </div>
       </div>
+
+      <h2 class="section-title">Patients consultés par spécialité</h2>
+      <div class="card card--flush">
+        <div class="item-list">
+          <div v-for="(row, index) in stats.patientsBySpeciality" :key="row.speciality" class="item-row">
+            <div class="item-row__main">
+              <span class="item-row__title">{{ index + 1 }}. {{ row.speciality }}</span>
+              <div class="speciality-bar">
+                <div
+                  class="speciality-bar__fill"
+                  :style="{ width: barWidth(row.patientCount) + '%' }"
+                ></div>
+              </div>
+            </div>
+            <span class="badge badge--neutral">{{ row.patientCount }} patient(s)</span>
+          </div>
+          <p v-if="!stats.patientsBySpeciality?.length" class="empty">
+            Aucune consultation terminée pour le moment.
+          </p>
+        </div>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
 import AppIcon from '../components/AppIcon.vue';
 
@@ -81,6 +102,11 @@ const statusLabels = {
 };
 const statusLabel = (status) => statusLabels[status] || status;
 
+const maxPatientsBySpeciality = computed(() =>
+  Math.max(1, ...(stats.value?.patientsBySpeciality || []).map((row) => row.patientCount))
+);
+const barWidth = (count) => Math.round((count / maxPatientsBySpeciality.value) * 100);
+
 onMounted(async () => {
   loading.value = true;
   try {
@@ -92,3 +118,20 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.speciality-bar {
+  width: 100%;
+  max-width: 320px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border);
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+.speciality-bar__fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+</style>

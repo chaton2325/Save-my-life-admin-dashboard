@@ -18,7 +18,7 @@
         <div class="item-list">
           <div v-for="request in requests" :key="request.id" class="item-row">
             <div class="item-row__main">
-              <span class="item-row__title">{{ SOS_TYPE_LABEL[request.type] }}</span>
+              <span class="item-row__title">{{ typeLabel(request.type) }}</span>
               <span class="item-row__meta">{{ formatDate(request.createdAt) }}</span>
               <a
                 v-if="request.latitude != null"
@@ -40,16 +40,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import * as sosService from '../services/sos.service';
-import { SOS_TYPES, SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
+import * as sosTypeService from '../services/sosType.service';
+import { SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
 import AppIcon from '../components/AppIcon.vue';
-
-const SOS_TYPE_LABEL = Object.fromEntries(SOS_TYPES.map((t) => [t.value, t.label]));
 
 const requests = ref([]);
 const loading = ref(false);
 const errorMessage = ref('');
+
+// Inclut les types désactivés/renommés : une alerte passée doit rester lisible.
+const sosTypeLabel = reactive({});
+const typeLabel = (value) => sosTypeLabel[value] || value;
 
 const formatDate = (value) =>
   new Date(value).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
@@ -57,7 +60,11 @@ const formatDate = (value) =>
 onMounted(async () => {
   loading.value = true;
   try {
-    requests.value = await sosService.getMySosRequests();
+    const [myRequests, types] = await Promise.all([sosService.getMySosRequests(), sosTypeService.getSosTypes()]);
+    requests.value = myRequests;
+    types.forEach((t) => {
+      sosTypeLabel[t.value] = t.label;
+    });
   } catch (err) {
     errorMessage.value = err.response?.data?.message || 'Impossible de charger vos alertes.';
   } finally {

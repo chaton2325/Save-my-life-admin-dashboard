@@ -25,16 +25,6 @@ export const updateSosStatus = async (id, payload) => {
   return data.data.sosRequest;
 };
 
-export const SOS_TYPES = [
-  { value: 'accident', label: 'Accident', icon: 'alertTriangle' },
-  { value: 'malaise', label: 'Malaise', icon: 'heartbeat' },
-  { value: 'difficulte_respiratoire', label: 'Difficulté respiratoire', icon: 'activity' },
-  { value: 'douleur_importante', label: 'Douleur importante', icon: 'alertTriangle' },
-  { value: 'enfant_difficulte', label: 'Enfant en difficulté', icon: 'users' },
-  { value: 'besoin_ambulance', label: "Besoin d'une ambulance", icon: 'building' },
-  { value: 'autre', label: 'Autre urgence', icon: 'helpCircle' },
-];
-
 export const SOS_STATUS_LABELS = {
   nouveau: 'Nouveau',
   en_cours: 'En cours',

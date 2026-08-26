@@ -27,7 +27,7 @@
       <div v-for="request in requests" :key="request.id" class="card" style="margin-bottom: var(--space-4)">
         <div class="item-row__main" style="margin-bottom: var(--space-3)">
           <span class="item-row__title">
-            {{ request.patient?.firstName }} {{ request.patient?.lastName }} — {{ SOS_TYPE_LABEL[request.type] }}
+            {{ request.patient?.firstName }} {{ request.patient?.lastName }} — {{ typeLabel(request.type) }}
           </span>
           <span class="item-row__meta">{{ formatDate(request.createdAt) }}</span>
           <span v-if="request.description" class="item-row__meta">{{ request.description }}</span>
@@ -79,12 +79,15 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import * as sosService from '../services/sos.service';
-import { SOS_TYPES, SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
+import * as sosTypeService from '../services/sosType.service';
+import { SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
 import AppIcon from '../components/AppIcon.vue';
 import PaginationControl from '../components/PaginationControl.vue';
 
-const SOS_TYPE_LABEL = Object.fromEntries(SOS_TYPES.map((t) => [t.value, t.label]));
 const SOS_STATUSES = Object.keys(SOS_STATUS_LABELS);
+// Inclut les types désactivés/renommés : une alerte passée doit rester lisible.
+const sosTypeLabel = reactive({});
+const typeLabel = (value) => sosTypeLabel[value] || value;
 
 const statusFilters = [
   { value: '', label: 'Toutes' },
@@ -139,7 +142,21 @@ const save = async (request) => {
   }
 };
 
-onMounted(() => fetchRequests());
+const fetchTypeLabels = async () => {
+  try {
+    const types = await sosTypeService.getSosTypes();
+    types.forEach((t) => {
+      sosTypeLabel[t.value] = t.label;
+    });
+  } catch {
+    // Non bloquant : on retombe sur la valeur brute si les libellés sont indisponibles.
+  }
+};
+
+onMounted(() => {
+  fetchRequests();
+  fetchTypeLabels();
+});
 </script>
 
 <style scoped>

@@ -38,28 +38,32 @@
     <!-- Étape 2 : type d'urgence -->
     <div v-else-if="step === 'type'" class="card card--narrow">
       <h2 class="section-title" style="margin-top: 0">Quel type d'urgence ?</h2>
-      <div class="sos-type-grid">
-        <button
-          v-for="t in SOS_TYPES"
-          :key="t.value"
-          type="button"
-          class="sos-type-btn"
-          :class="{ 'is-selected': type === t.value }"
-          @click="type = t.value"
-        >
-          <AppIcon :name="t.icon" />
-          {{ t.label }}
+      <p v-if="loadingTypes" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
+      <p v-else-if="typesError" class="alert alert--error">{{ typesError }}</p>
+      <template v-else>
+        <div class="sos-type-grid">
+          <button
+            v-for="t in sosTypes"
+            :key="t.value"
+            type="button"
+            class="sos-type-btn"
+            :class="{ 'is-selected': type === t.value }"
+            @click="type = t.value"
+          >
+            <AppIcon :name="t.icon" />
+            {{ t.label }}
+          </button>
+        </div>
+
+        <div class="field" style="margin-top: var(--space-4)">
+          <label>Précisions (optionnel)</label>
+          <textarea v-model="description" rows="3" placeholder="Décrivez brièvement la situation"></textarea>
+        </div>
+
+        <button class="btn btn--danger btn--block" style="margin-top: var(--space-4)" :disabled="!type" @click="next">
+          Continuer
         </button>
-      </div>
-
-      <div v-if="type === 'autre'" class="field" style="margin-top: var(--space-4)">
-        <label>Précisez</label>
-        <textarea v-model="description" rows="3" placeholder="Décrivez brièvement la situation"></textarea>
-      </div>
-
-      <button class="btn btn--danger btn--block" style="margin-top: var(--space-4)" :disabled="!type" @click="next">
-        Continuer
-      </button>
+      </template>
     </div>
 
     <!-- Étape 3 : personnes à prévenir -->
@@ -159,12 +163,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '../store/auth.store';
 import * as sosService from '../services/sos.service';
+import * as sosTypeService from '../services/sosType.service';
 import * as userService from '../services/user.service';
 import AppIcon from '../components/AppIcon.vue';
-import { SOS_TYPES, SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
+import { SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
 
 const authStore = useAuthStore();
 
@@ -175,6 +180,10 @@ const stepIndex = computed(() => steps.indexOf(step.value));
 const position = ref(null);
 const locating = ref(false);
 const geoError = ref('');
+
+const sosTypes = ref([]);
+const loadingTypes = ref(false);
+const typesError = ref('');
 
 const type = ref('');
 const description = ref('');
@@ -188,9 +197,23 @@ const submitError = ref('');
 const sosRequest = ref(null);
 const emergencyClinics = ref([]);
 
-const typeLabel = computed(() => SOS_TYPES.find((t) => t.value === type.value)?.label || '');
+const typeLabel = computed(() => sosTypes.value.find((t) => t.value === type.value)?.label || '');
 
 const telHref = (phone) => `tel:${phone.replace(/\s+/g, '')}`;
+
+const fetchTypes = async () => {
+  loadingTypes.value = true;
+  typesError.value = '';
+  try {
+    sosTypes.value = await sosTypeService.getSosTypes();
+  } catch (err) {
+    typesError.value = err.response?.data?.message || "Impossible de charger les types d'urgence.";
+  } finally {
+    loadingTypes.value = false;
+  }
+};
+
+onMounted(fetchTypes);
 
 const requestLocation = () => {
   if (!navigator.geolocation) {

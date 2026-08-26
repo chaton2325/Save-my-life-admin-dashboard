@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-header">
       <div>
-        <h1>Passeport Santé</h1>
+        <h1>Passeport Save My Life Cameroun</h1>
         <p class="page-subtitle">Votre dossier de santé personnel, centralisé et sécurisé.</p>
       </div>
     </div>

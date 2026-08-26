@@ -3,7 +3,7 @@
     <div class="page-header">
       <div>
         <h1>Paramètres</h1>
-        <p class="page-subtitle">Gestion des spécialités médicales proposées dans l'application</p>
+        <p class="page-subtitle">Spécialités médicales et types d'urgence proposés dans l'application</p>
       </div>
       <div class="input-icon search-input">
         <AppIcon name="search" size="sm" />
@@ -65,12 +65,88 @@
         {{ creating ? 'Ajout...' : 'Ajouter la spécialité' }}
       </button>
     </CreatePanel>
+
+    <h2 class="section-title">Types d'urgence SOS</h2>
+    <p class="page-subtitle" style="margin-top: calc(-1 * var(--space-2))">
+      Options proposées aux patients à l'étape « type d'urgence » du bouton URGENCE
+    </p>
+
+    <div class="card card--flush">
+      <p v-if="loadingTypes" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
+      <p v-else-if="typesErrorMessage" class="alert alert--error">{{ typesErrorMessage }}</p>
+      <template v-else>
+        <div class="item-list">
+          <div v-for="sosType in sosTypes" :key="sosType.id">
+            <div class="item-row">
+              <template v-if="editingTypeId === sosType.id">
+                <div class="sos-type-edit">
+                  <input v-model="editTypeLabel" type="text" style="max-width: 260px" />
+                  <select v-model="editTypeIcon">
+                    <option v-for="icon in SOS_TYPE_ICONS" :key="icon" :value="icon">{{ icon }}</option>
+                  </select>
+                </div>
+              </template>
+              <div v-else class="item-row__main">
+                <span class="item-row__title sos-type-title">
+                  <AppIcon :name="sosType.icon" size="sm" />
+                  {{ sosType.label }}
+                </span>
+                <span class="badge" :class="sosType.isActive ? 'badge--completed' : 'badge--cancelled'">
+                  {{ sosType.isActive ? 'Actif' : 'Désactivé' }}
+                </span>
+              </div>
+              <div v-if="editingTypeId === sosType.id" class="item-row__actions">
+                <button class="btn btn--primary btn--sm" :disabled="editTypeLoading" @click="submitTypeRename(sosType)">
+                  Enregistrer
+                </button>
+                <button class="btn btn--ghost btn--sm" @click="editingTypeId = null">Annuler</button>
+              </div>
+              <RowActions
+                v-else
+                :title="sosType.label"
+                :actions="sosTypeActions(sosType)"
+                @select="(key) => runSosTypeAction(key, sosType)"
+              />
+            </div>
+            <p v-if="typeRowError === sosType.id" class="alert alert--error" style="margin-top: var(--space-2)">
+              {{ typeRowErrorMessage }}
+            </p>
+          </div>
+          <p v-if="sosTypes.length === 0" class="empty">Aucun type d'urgence configuré.</p>
+        </div>
+      </template>
+    </div>
+
+    <CreatePanel title="Ajouter un type d'urgence" trigger-label="Nouveau type d'urgence">
+      <div class="field">
+        <label>Libellé</label>
+        <input v-model="newTypeLabel" type="text" placeholder="ex: Crise cardiaque" @keyup.enter="submitTypeCreate" />
+      </div>
+      <div class="field">
+        <label>Icône</label>
+        <select v-model="newTypeIcon">
+          <option v-for="icon in SOS_TYPE_ICONS" :key="icon" :value="icon">{{ icon }}</option>
+        </select>
+      </div>
+      <p v-if="typeCreateError" class="alert alert--error">{{ typeCreateError }}</p>
+      <p v-if="typeCreateSuccess" class="alert alert--success">{{ typeCreateSuccess }}</p>
+      <button
+        class="btn btn--primary btn--block"
+        :disabled="!newTypeLabel.trim() || creatingType"
+        @click="submitTypeCreate"
+      >
+        <span v-if="creatingType" class="spinner"></span>
+        {{ creatingType ? 'Ajout...' : "Ajouter le type d'urgence" }}
+      </button>
+    </CreatePanel>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import * as specialityService from '../services/speciality.service';
+import * as sosTypeService from '../services/sosType.service';
+import { SOS_TYPE_ICONS } from '../services/sosType.service';
 import AppIcon from '../components/AppIcon.vue';
 import CreatePanel from '../components/CreatePanel.vue';
 import RowActions from '../components/RowActions.vue';
@@ -191,5 +267,131 @@ const remove = async (speciality) => {
   }
 };
 
-onMounted(() => fetchSpecialities());
+// --- Types d'urgence SOS ---
+
+const sosTypes = ref([]);
+const loadingTypes = ref(false);
+const typesErrorMessage = ref('');
+
+const editingTypeId = ref(null);
+const editTypeLabel = ref('');
+const editTypeIcon = ref('');
+const editTypeLoading = ref(false);
+
+const typeRowError = ref(null);
+const typeRowErrorMessage = ref('');
+
+const newTypeLabel = ref('');
+const newTypeIcon = ref(SOS_TYPE_ICONS[0]);
+const creatingType = ref(false);
+const typeCreateError = ref('');
+const typeCreateSuccess = ref('');
+
+const fetchSosTypes = async () => {
+  loadingTypes.value = true;
+  typesErrorMessage.value = '';
+  try {
+    sosTypes.value = await sosTypeService.getSosTypes();
+  } catch (err) {
+    typesErrorMessage.value = err.response?.data?.message || "Impossible de charger les types d'urgence.";
+  } finally {
+    loadingTypes.value = false;
+  }
+};
+
+const submitTypeCreate = async () => {
+  if (!newTypeLabel.value.trim()) return;
+  creatingType.value = true;
+  typeCreateError.value = '';
+  typeCreateSuccess.value = '';
+  try {
+    await sosTypeService.createSosType({ label: newTypeLabel.value.trim(), icon: newTypeIcon.value });
+    typeCreateSuccess.value = "Type d'urgence ajouté avec succès.";
+    newTypeLabel.value = '';
+    newTypeIcon.value = SOS_TYPE_ICONS[0];
+    await fetchSosTypes();
+  } catch (err) {
+    typeCreateError.value = err.response?.data?.message || "Impossible d'ajouter ce type d'urgence.";
+  } finally {
+    creatingType.value = false;
+  }
+};
+
+const sosTypeActions = (sosType) => [
+  { key: 'rename', label: 'Modifier', icon: 'edit' },
+  {
+    key: 'toggle',
+    label: sosType.isActive ? 'Désactiver' : 'Activer',
+    icon: sosType.isActive ? 'x' : 'check',
+  },
+  { key: 'delete', label: 'Supprimer', icon: 'trash', danger: true },
+];
+
+const runSosTypeAction = (key, sosType) => {
+  if (key === 'rename') startTypeRename(sosType);
+  else if (key === 'toggle') toggleTypeActive(sosType);
+  else if (key === 'delete') removeType(sosType);
+};
+
+const startTypeRename = (sosType) => {
+  editingTypeId.value = sosType.id;
+  editTypeLabel.value = sosType.label;
+  editTypeIcon.value = sosType.icon;
+  typeRowError.value = null;
+};
+
+const submitTypeRename = async (sosType) => {
+  editTypeLoading.value = true;
+  typeRowError.value = null;
+  try {
+    await sosTypeService.updateSosType(sosType.id, { label: editTypeLabel.value.trim(), icon: editTypeIcon.value });
+    editingTypeId.value = null;
+    await fetchSosTypes();
+  } catch (err) {
+    typeRowError.value = sosType.id;
+    typeRowErrorMessage.value = err.response?.data?.message || "Impossible de modifier ce type d'urgence.";
+  } finally {
+    editTypeLoading.value = false;
+  }
+};
+
+const toggleTypeActive = async (sosType) => {
+  typeRowError.value = null;
+  try {
+    await sosTypeService.updateSosType(sosType.id, { isActive: !sosType.isActive });
+    await fetchSosTypes();
+  } catch (err) {
+    typeRowError.value = sosType.id;
+    typeRowErrorMessage.value = err.response?.data?.message || "Impossible de modifier ce type d'urgence.";
+  }
+};
+
+const removeType = async (sosType) => {
+  typeRowError.value = null;
+  try {
+    await sosTypeService.deleteSosType(sosType.id);
+    await fetchSosTypes();
+  } catch (err) {
+    typeRowError.value = sosType.id;
+    typeRowErrorMessage.value = err.response?.data?.message || "Impossible de supprimer ce type d'urgence.";
+  }
+};
+
+onMounted(() => {
+  fetchSpecialities();
+  fetchSosTypes();
+});
 </script>
+
+<style scoped>
+.sos-type-edit {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.sos-type-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+</style>
