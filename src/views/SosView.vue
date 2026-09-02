@@ -1,9 +1,17 @@
 <template>
   <div class="page">
     <div class="page-header">
-      <div>
+      <div style="width: 100%">
         <h1>Alerte SOS médicale</h1>
         <p class="page-subtitle" v-if="step !== 'result'">Étape {{ stepIndex + 1 }} / {{ steps.length }}</p>
+        <div v-if="step !== 'result'" class="sos-progress">
+          <span
+            v-for="(s, i) in steps.slice(0, -1)"
+            :key="s"
+            class="sos-progress__seg"
+            :class="{ 'is-done': i <= stepIndex }"
+          ></span>
+        </div>
       </div>
     </div>
 
@@ -50,8 +58,9 @@
             :class="{ 'is-selected': type === t.value }"
             @click="type = t.value"
           >
-            <AppIcon :name="t.icon" />
+            <span class="sos-type-btn__icon"><AppIcon :name="t.icon" /></span>
             {{ t.label }}
+            <span v-if="type === t.value" class="sos-type-btn__check"><AppIcon name="check" size="sm" /></span>
           </button>
         </div>
 
@@ -275,30 +284,93 @@ const submit = async () => {
 </script>
 
 <style scoped>
+/* Piste d'étapes : segments qui s'allument au fil du parcours SOS. */
+.sos-progress {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+.sos-progress__seg {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+  transition: background 0.25s var(--ease);
+}
+.sos-progress__seg.is-done {
+  background: var(--color-error);
+}
+
 .sos-type-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
 }
+/* Même galet d'icône que les quick-link-card de l'accueil, teinté danger. */
 .sos-type-btn {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4) var(--space-2);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.18s var(--ease),
+    box-shadow 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    color 0.18s var(--ease);
+}
+.sos-type-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.sos-type-btn:active {
+  transform: scale(0.99);
+}
+.sos-type-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius);
+  background-image: linear-gradient(180deg, #ffffff 0%, var(--color-primary-soft) 100%);
+  border: 1px solid rgba(29, 78, 216, 0.14);
+  color: var(--color-primary);
+  box-shadow: var(--rim-light), inset 0 -1px 0 rgba(29, 78, 216, 0.08), var(--cast-contact);
+  transition: background-image 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease);
 }
 .sos-type-btn.is-selected {
   border-color: var(--color-error);
-  background: var(--color-error-bg);
   color: var(--color-error);
+  box-shadow: var(--shadow), 0 0 0 3px var(--color-error-bg);
+}
+.sos-type-btn.is-selected .sos-type-btn__icon {
+  background-image: linear-gradient(180deg, #ffffff 0%, var(--color-error-bg) 100%);
+  border-color: rgba(193, 18, 31, 0.25);
+  color: var(--color-error);
+}
+.sos-type-btn__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--color-error);
+  color: #fff;
 }
 .sos-recap {
   list-style: none;

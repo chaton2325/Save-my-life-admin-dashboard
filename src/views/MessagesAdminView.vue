@@ -145,17 +145,22 @@ onMounted(fetchThreads);
 .chat-bubble {
   max-width: 75%;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
+  animation: rise-in 0.2s var(--ease) both;
 }
 .chat-bubble--in {
   align-self: flex-start;
-  background: var(--color-surface-hover);
+  border-bottom-left-radius: var(--space-1);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
 }
 .chat-bubble--out {
   align-self: flex-end;
-  background: var(--color-primary);
+  border-bottom-right-radius: var(--space-1);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 44%), var(--gradient-primary);
   color: #fff;
+  box-shadow: var(--cast-contact-primary), 0 4px 10px -4px rgba(29, 78, 216, 0.45);
 }
 .chat-bubble__body {
   margin: 0;
