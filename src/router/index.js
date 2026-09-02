@@ -48,6 +48,7 @@ const routes = [
 
       // Commun à tous les rôles
       { path: 'mot-de-passe', name: 'change-password', component: () => import('../views/ChangePasswordView.vue') },
+      { path: 'livre-blanc', name: 'livre-blanc', component: () => import('../views/LivreBlancView.vue') },
 
       // Admin
       { path: 'tableau-de-bord', name: 'admin-dashboard', meta: { roles: ['admin'] }, component: () => import('../views/AdminDashboardView.vue') },

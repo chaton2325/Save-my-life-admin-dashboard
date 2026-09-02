@@ -191,6 +191,7 @@ export const MAX_TABS = 4;
 /** Liens toujours accessibles, regroupés dans le menu « Plus » / bas de sidebar. */
 export const ACCOUNT_NAV = [
   { to: '/mot-de-passe', icon: 'lock', label: 'Mot de passe', short: 'Sécurité' },
+  { to: '/livre-blanc', icon: 'book', label: 'Livre blanc', short: 'Livre blanc' },
 ];
 
 /** Tous les liens du rôle courant, dans l'ordre d'affichage. */
