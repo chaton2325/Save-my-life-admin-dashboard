@@ -17,18 +17,21 @@
       <template v-else>
         <div class="item-list">
           <div v-for="request in requests" :key="request.id" class="item-row">
+            <span class="lead-icon lead-icon--danger item-row__lead"><AppIcon name="alertTriangle" /></span>
             <div class="item-row__main">
               <span class="item-row__title">{{ typeLabel(request.type) }}</span>
-              <span class="item-row__meta">{{ formatDate(request.createdAt) }}</span>
-              <a
-                v-if="request.latitude != null"
-                class="item-row__meta"
-                :href="`https://www.google.com/maps?q=${request.latitude},${request.longitude}`"
-                target="_blank"
-                rel="noopener"
-              >
-                Voir la position transmise
-              </a>
+              <div class="meta-list">
+                <span class="meta-item"><AppIcon name="clock" size="sm" />{{ formatDate(request.createdAt) }}</span>
+                <a
+                  v-if="request.latitude != null"
+                  class="meta-item meta-item--link"
+                  :href="`https://www.google.com/maps?q=${request.latitude},${request.longitude}`"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <AppIcon name="mapPin" size="sm" />Voir la position transmise
+                </a>
+              </div>
             </div>
             <span class="badge" :class="SOS_STATUS_BADGE[request.status]">{{ SOS_STATUS_LABELS[request.status] }}</span>
           </div>

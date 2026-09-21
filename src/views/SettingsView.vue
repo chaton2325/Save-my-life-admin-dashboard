@@ -5,19 +5,68 @@
         <h1>Paramètres</h1>
         <p class="page-subtitle">Spécialités médicales et types d'urgence proposés dans l'application</p>
       </div>
-      <div class="input-icon search-input">
-        <AppIcon name="search" size="sm" />
-        <input v-model="search" type="search" placeholder="Rechercher une spécialité..." />
+    </div>
+
+    <div class="dash-grid kpi-strip">
+      <div class="tile tile--brand kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Spécialités</span>
+          <span class="kpi__icon"><AppIcon name="clipboard" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ loading ? '–' : specialities.length }}</p>
+          <p class="kpi__meta">médicales configurées</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Spécialités actives</span>
+          <span class="kpi__icon"><AppIcon name="check" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ loading ? '–' : specialities.filter((s) => s.isActive).length }}</p>
+          <p class="kpi__meta">proposées aux patients</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Types d'urgence</span>
+          <span class="kpi__icon"><AppIcon name="alertTriangle" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ loadingTypes ? '–' : sosTypes.length }}</p>
+          <p class="kpi__meta">pour le bouton URGENCE</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Types actifs</span>
+          <span class="kpi__icon"><AppIcon name="check" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ loadingTypes ? '–' : sosTypes.filter((t) => t.isActive).length }}</p>
+          <p class="kpi__meta">visibles des patients</p>
+        </div>
       </div>
     </div>
 
     <div class="card card--flush">
+      <div class="card__toolbar">
+        <h2 class="card__title">Spécialités médicales <span class="count-chip">{{ specialities.length }}</span></h2>
+        <div class="input-icon search-input">
+          <AppIcon name="search" size="sm" />
+          <input v-model="search" type="search" placeholder="Rechercher une spécialité..." />
+        </div>
+      </div>
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
           <div v-for="speciality in filteredSpecialities" :key="speciality.id">
             <div class="item-row">
+              <span class="lead-icon item-row__lead" :class="{ 'lead-icon--muted': !speciality.isActive }">
+                <AppIcon name="clipboard" />
+              </span>
               <template v-if="editingId === speciality.id">
                 <input v-model="editName" type="text" style="max-width: 320px" />
               </template>
@@ -66,18 +115,20 @@
       </button>
     </CreatePanel>
 
-    <h2 class="section-title">Types d'urgence SOS</h2>
-    <p class="page-subtitle" style="margin-top: calc(-1 * var(--space-2))">
-      Options proposées aux patients à l'étape « type d'urgence » du bouton URGENCE
-    </p>
-
     <div class="card card--flush">
+      <div class="card__toolbar">
+        <h2 class="card__title">Types d'urgence SOS <span class="count-chip">{{ sosTypes.length }}</span></h2>
+      </div>
+      <p class="card__hint">Options proposées aux patients à l'étape « type d'urgence » du bouton URGENCE</p>
       <p v-if="loadingTypes" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="typesErrorMessage" class="alert alert--error">{{ typesErrorMessage }}</p>
       <template v-else>
         <div class="item-list">
           <div v-for="sosType in sosTypes" :key="sosType.id">
             <div class="item-row">
+              <span class="lead-icon lead-icon--danger item-row__lead" :class="{ 'lead-icon--muted': !sosType.isActive }">
+                <AppIcon :name="sosType.icon" />
+              </span>
               <template v-if="editingTypeId === sosType.id">
                 <div class="sos-type-edit">
                   <input v-model="editTypeLabel" type="text" style="max-width: 260px" />
@@ -87,10 +138,7 @@
                 </div>
               </template>
               <div v-else class="item-row__main">
-                <span class="item-row__title sos-type-title">
-                  <AppIcon :name="sosType.icon" size="sm" />
-                  {{ sosType.label }}
-                </span>
+                <span class="item-row__title">{{ sosType.label }}</span>
                 <span class="badge" :class="sosType.isActive ? 'badge--completed' : 'badge--cancelled'">
                   {{ sosType.isActive ? 'Actif' : 'Désactivé' }}
                 </span>

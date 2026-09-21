@@ -1,11 +1,20 @@
 <template>
-  <!-- Desktop : le formulaire reste dans le flux de la page. -->
-  <template v-if="!isMobile">
-    <h2 class="section-title">{{ title }}</h2>
-    <div class="card card--narrow">
-      <slot />
+  <!-- Desktop : un panneau repliable dans le flux de la page. -->
+  <details v-if="!isMobile" class="disclosure create-panel" :open="open" @toggle="open = $event.target.open">
+    <summary class="disclosure__summary">
+      <span class="quick-link-card__icon"><AppIcon :name="icon" /></span>
+      <span class="disclosure__text">
+        <span class="disclosure__title">{{ title }}</span>
+        <span class="disclosure__hint">Cliquez pour ouvrir le formulaire</span>
+      </span>
+      <AppIcon name="chevronRight" class="disclosure__chevron" />
+    </summary>
+    <div class="disclosure__body">
+      <div class="create-panel__form">
+        <slot />
+      </div>
     </div>
-  </template>
+  </details>
 
   <!-- Mobile : bouton flottant + feuille, pour ne pas allonger la page. -->
   <template v-else>

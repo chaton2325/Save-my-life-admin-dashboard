@@ -12,16 +12,24 @@
 
     <template v-if="!selectedUserId">
       <p v-if="loadingThreads" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
-      <div v-else class="item-list">
+      <div v-else class="card card--flush">
+        <div class="item-list">
         <div v-for="thread in threads" :key="thread.user.id" class="item-row" style="cursor: pointer" @click="openThread(thread.user.id)">
+          <span class="avatar item-row__lead" :class="{ 'avatar--muted': thread.unreadCount === 0 }" aria-hidden="true">
+            {{ initialsOf(thread.user) }}
+          </span>
           <div class="item-row__main">
-            <span class="item-row__title">{{ thread.user.firstName }} {{ thread.user.lastName }}</span>
-            <span class="item-row__meta">{{ thread.user.phoneNumber }} · {{ roleLabel(thread.user.role) }}</span>
-            <span class="item-row__meta">{{ thread.lastMessage.body }}</span>
+            <div class="item-row__heading">
+              <span class="item-row__title">{{ thread.user.firstName }} {{ thread.user.lastName }}</span>
+              <span v-if="thread.user.role" class="chip chip--muted">{{ roleLabel(thread.user.role) }}</span>
+            </div>
+            <span v-if="thread.user.phoneNumber" class="item-row__meta">{{ thread.user.phoneNumber }}</span>
+            <span class="item-row__meta item-row__meta--clamp">{{ thread.lastMessage.body }}</span>
           </div>
           <span v-if="thread.unreadCount > 0" class="badge badge--confirmed">{{ thread.unreadCount }}</span>
         </div>
         <p v-if="threads.length === 0" class="empty">Aucune conversation pour le moment.</p>
+        </div>
       </div>
     </template>
 
@@ -57,6 +65,7 @@
 import { ref, nextTick, onMounted } from 'vue';
 import * as messageService from '../services/message.service';
 import AppIcon from '../components/AppIcon.vue';
+import { initialsOf } from '../utils/format';
 
 const threads = ref([]);
 const loadingThreads = ref(false);
@@ -153,14 +162,12 @@ onMounted(fetchThreads);
   border-bottom-left-radius: var(--space-1);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-xs);
 }
 .chat-bubble--out {
   align-self: flex-end;
   border-bottom-right-radius: var(--space-1);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 44%), var(--gradient-primary);
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--cast-contact-primary), 0 4px 10px -4px rgba(29, 78, 216, 0.45);
 }
 .chat-bubble__body {
   margin: 0;

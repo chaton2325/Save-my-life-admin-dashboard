@@ -31,7 +31,6 @@
           :key="item.to"
           :to="item.to"
           class="nav-link"
-          style="margin-bottom: var(--space-3)"
         >
           <AppIcon :name="item.icon" size="sm" />
           {{ item.label }}

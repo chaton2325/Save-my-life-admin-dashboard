@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page page--narrow">
     <div class="page-header">
       <div>
         <h1>Prendre rendez-vous</h1>

@@ -11,16 +11,54 @@
       </RouterLink>
     </div>
 
+    <div class="dash-grid kpi-strip">
+      <div class="tile tile--brand kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Rendez-vous</span>
+          <span class="kpi__icon"><AppIcon name="calendar" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ pagination.total }}</p>
+          <p class="kpi__meta">au total</p>
+        </div>
+      </div>
+      <div v-for="item in statusTiles" :key="item.status" class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">{{ item.label }}</span>
+          <span class="kpi__icon"><AppIcon :name="item.icon" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ counts[item.status] ?? '–' }}</p>
+          <p class="kpi__meta">{{ item.meta }}</p>
+        </div>
+      </div>
+    </div>
+
     <div class="card card--flush">
       <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
           <div v-for="appt in appointments" :key="appt.id" class="item-row">
+              <div class="date-chip item-row__lead" :class="`date-chip--${appt.status}`" aria-hidden="true">
+                <span class="date-chip__day">{{ dateParts(appt.scheduledAt).day }}</span>
+                <span class="date-chip__month">{{ dateParts(appt.scheduledAt).month }}</span>
+                <span class="date-chip__time">{{ dateParts(appt.scheduledAt).time }}</span>
+              </div>
             <div class="item-row__main">
-              <span class="item-row__title">Dr {{ appt.doctor?.firstName }} {{ appt.doctor?.lastName }}</span>
-              <span class="item-row__meta">{{ formatDateTime(appt.scheduledAt) }} — {{ appt.reason || 'Aucun motif précisé' }}</span>
-              <span class="badge" :class="`badge--${appt.status}`">{{ statusLabel(appt.status) }}</span>
+              <div class="item-row__heading">
+                <span class="item-row__title">Dr {{ appt.doctor?.firstName }} {{ appt.doctor?.lastName }}</span>
+                <span class="badge" :class="`badge--${appt.status}`">{{ statusLabel(appt.status) }}</span>
+              </div>
+              <div v-if="appt.doctor?.speciality" class="chips">
+                <span class="chip">{{ appt.doctor.speciality }}</span>
+              </div>
+              <div class="meta-list">
+                <span v-if="appt.doctor?.clinic?.name" class="meta-item">
+                  <AppIcon name="building" size="sm" />{{ appt.doctor.clinic.name }}
+                </span>
+                <span class="meta-item"><AppIcon name="clipboard" size="sm" />{{ appt.reason || 'Aucun motif précisé' }}</span>
+              </div>
             </div>
             <RowActions
               v-if="appointmentActions(appt).length"
@@ -133,8 +171,28 @@ import Modal from '../components/Modal.vue';
 import ItineraryMap from '../components/ItineraryMap.vue';
 import RowActions from '../components/RowActions.vue';
 import { haversineKm, googleMapsDirectionsUrl } from '../utils/geo';
+import { dateParts } from '../utils/format';
 
 const appointments = ref([]);
+
+// Compteurs par statut : un appel limité à 1 ligne par statut, seul le total nous intéresse.
+const statusTiles = [
+  { status: 'confirmed', label: 'Confirmés', icon: 'check', meta: 'rendez-vous confirmés' },
+  { status: 'pending', label: 'En attente', icon: 'clock', meta: 'en attente du médecin' },
+  { status: 'completed', label: 'Terminés', icon: 'fileText', meta: 'consultations réalisées' },
+];
+const counts = ref({ confirmed: null, pending: null, completed: null });
+const fetchCounts = async () => {
+  const totals = await Promise.all(
+    statusTiles.map(({ status }) =>
+      appointmentService
+        .getMyAppointments({ limit: 1, status })
+        .then((result) => result.pagination?.total ?? 0)
+        .catch(() => null)
+    )
+  );
+  counts.value = Object.fromEntries(statusTiles.map(({ status }, i) => [status, totals[i]]));
+};
 const itineraryAppointment = ref(null);
 const myPosition = ref(null);
 const locating = ref(false);
@@ -252,7 +310,7 @@ const submitEdit = async () => {
       reason: editForm.value.reason,
     });
     editing.value = null;
-    await fetchAppointments(pagination.value.page);
+    await Promise.all([fetchAppointments(pagination.value.page), fetchCounts()]);
   } catch (err) {
     editError.value = err.response?.data?.message || 'Impossible de modifier ce rendez-vous.';
   } finally {
@@ -273,7 +331,7 @@ const submitCancel = async () => {
   try {
     await appointmentService.cancelAppointment(cancelling.value.id, cancelReason.value);
     cancelling.value = null;
-    await fetchAppointments(pagination.value.page);
+    await Promise.all([fetchAppointments(pagination.value.page), fetchCounts()]);
   } catch (err) {
     cancelError.value = err.response?.data?.message || 'Impossible d’annuler ce rendez-vous.';
   } finally {
@@ -281,5 +339,8 @@ const submitCancel = async () => {
   }
 };
 
-onMounted(() => fetchAppointments());
+onMounted(() => {
+  fetchAppointments();
+  fetchCounts();
+});
 </script>

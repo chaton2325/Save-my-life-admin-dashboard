@@ -17,10 +17,13 @@
             v-for="n in notifications"
             :key="n.id"
             class="item-row"
-            :style="!n.isRead ? { borderColor: 'var(--color-primary)' } : {}"
+            :class="{ 'is-unread': !n.isRead }"
             style="cursor: pointer"
             @click="!n.isRead && markRead(n)"
           >
+            <span class="lead-icon item-row__lead" :class="notifTone(n)">
+              <AppIcon :name="notifIcon(n)" />
+            </span>
             <div class="item-row__main">
               <span class="item-row__title">{{ n.title }}</span>
               <span class="item-row__meta">{{ n.message }}</span>
@@ -41,8 +44,21 @@
 import { ref, onMounted } from 'vue';
 import * as notificationService from '../services/notification.service';
 import PaginationControl from '../components/PaginationControl.vue';
+import AppIcon from '../components/AppIcon.vue';
 
 const notifications = ref([]);
+
+// Icône et teinte selon le type de notification (rendez-vous créé, confirmé, refusé, annulé...).
+const notifIcon = (n) => {
+  if (n.type === 'appointment_confirmed') return 'check';
+  if (n.type === 'appointment_refused' || n.type === 'appointment_cancelled') return 'x';
+  if (n.type?.startsWith('appointment')) return 'calendar';
+  return 'bell';
+};
+const notifTone = (n) => ({
+  'lead-icon--success': n.type === 'appointment_confirmed',
+  'lead-icon--danger': n.type === 'appointment_refused' || n.type === 'appointment_cancelled',
+});
 const unreadCount = ref(0);
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 15 });
 const loading = ref(false);

@@ -8,6 +8,12 @@
     </div>
 
     <div class="card card--flush chat-card">
+      <div class="chat-owner">
+        <span class="avatar avatar--sm" aria-hidden="true">SM</span>
+        <span>
+          <strong class="chat-owner__name">Équipe Save My Life</strong>
+        </span>
+      </div>
       <div ref="listEl" class="chat-list">
         <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
         <template v-else>
@@ -98,6 +104,13 @@ onBeforeUnmount(() => clearInterval(pollTimer));
   flex-direction: column;
   height: min(70vh, 640px);
 }
+.chat-owner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
 .chat-list {
   flex: 1;
   overflow-y: auto;
@@ -117,14 +130,12 @@ onBeforeUnmount(() => clearInterval(pollTimer));
   border-bottom-left-radius: var(--space-1);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-xs);
 }
 .chat-bubble--out {
   align-self: flex-end;
   border-bottom-right-radius: var(--space-1);
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 44%), var(--gradient-primary);
+  background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--cast-contact-primary), 0 4px 10px -4px rgba(29, 78, 216, 0.45);
 }
 .chat-bubble__body {
   margin: 0;

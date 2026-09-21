@@ -8,31 +8,27 @@
     </div>
 
     <div class="card card--flush">
+      <div class="card__toolbar">
+        <h2 class="card__title">Historique des actions <span class="count-chip">{{ pagination.total }}</span></h2>
+      </div>
       <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Action</th>
-                <th>Auteur</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="log in logs" :key="log.id">
-                <td class="td--primary">{{ actionLabel(log.action) }}</td>
-                <td data-label="Auteur">
+        <div class="item-list">
+          <div v-for="log in logs" :key="log.id" class="item-row">
+            <span class="lead-icon item-row__lead"><AppIcon :name="logIcon(log.action)" /></span>
+            <div class="item-row__main">
+              <span class="item-row__title">{{ actionLabel(log.action) }}</span>
+              <div class="meta-list">
+                <span class="meta-item">
+                  <AppIcon name="user" size="sm" />
                   {{ log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : 'Système' }}
-                </td>
-                <td data-label="Date">{{ formatDateTime(log.createdAt) }}</td>
-              </tr>
-              <tr v-if="logs.length === 0">
-                <td colspan="3" class="empty">Aucune activité enregistrée.</td>
-              </tr>
-            </tbody>
-          </table>
+                </span>
+                <span class="meta-item"><AppIcon name="clock" size="sm" />{{ formatDateTime(log.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+          <p v-if="logs.length === 0" class="empty">Aucune activité enregistrée.</p>
         </div>
 
         <PaginationControl :page="pagination.page" :total-pages="pagination.totalPages" @change="fetchLogs" />
@@ -45,20 +41,13 @@
 import { ref, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
 import PaginationControl from '../components/PaginationControl.vue';
+import AppIcon from '../components/AppIcon.vue';
+import { actionLabel, logIcon } from '../config/activityLog';
 
 const logs = ref([]);
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 20 });
 const loading = ref(false);
 const errorMessage = ref('');
-
-const actionLabels = {
-  'admin.appoint_admin': 'A nommé un administrateur',
-  'admin.register_doctor': 'A enregistré un médecin',
-  'admin.update_doctor': 'A modifié un médecin',
-  'admin.assign_patient_doctor': 'A assigné un patient à un médecin',
-  'appointment.resolve_conflict': 'A résolu un conflit de rendez-vous',
-};
-const actionLabel = (action) => actionLabels[action] || action;
 
 const formatDateTime = (value) =>
   new Date(value).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });

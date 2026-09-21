@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page page--narrow">
     <div class="page-header">
       <div style="width: 100%">
         <h1>Alerte SOS médicale</h1>
@@ -331,6 +331,7 @@ const submit = async () => {
 }
 .sos-type-btn:hover {
   transform: translateY(-2px);
+  border-color: rgba(29, 78, 216, 0.35);
   box-shadow: var(--shadow);
 }
 .sos-type-btn:active {
@@ -342,12 +343,10 @@ const submit = async () => {
   justify-content: center;
   width: 44px;
   height: 44px;
-  border-radius: var(--radius);
-  background-image: linear-gradient(180deg, #ffffff 0%, var(--color-primary-soft) 100%);
-  border: 1px solid rgba(29, 78, 216, 0.14);
+  border-radius: 50%;
+  background: var(--color-primary-soft);
   color: var(--color-primary);
-  box-shadow: var(--rim-light), inset 0 -1px 0 rgba(29, 78, 216, 0.08), var(--cast-contact);
-  transition: background-image 0.18s var(--ease), border-color 0.18s var(--ease), color 0.18s var(--ease);
+  transition: background 0.18s var(--ease), color 0.18s var(--ease);
 }
 .sos-type-btn.is-selected {
   border-color: var(--color-error);
@@ -355,8 +354,7 @@ const submit = async () => {
   box-shadow: var(--shadow), 0 0 0 3px var(--color-error-bg);
 }
 .sos-type-btn.is-selected .sos-type-btn__icon {
-  background-image: linear-gradient(180deg, #ffffff 0%, var(--color-error-bg) 100%);
-  border-color: rgba(193, 18, 31, 0.25);
+  background: var(--color-error-bg);
   color: var(--color-error);
 }
 .sos-type-btn__check {

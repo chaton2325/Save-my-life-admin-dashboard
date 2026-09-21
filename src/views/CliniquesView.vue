@@ -3,30 +3,85 @@
     <div class="page-header">
       <div>
         <h1>Cliniques</h1>
-        <p class="page-subtitle">{{ pagination.total }} clinique(s) enregistrée(s)</p>
+        <p class="page-subtitle">Structures de santé partenaires et médecins rattachés</p>
       </div>
-      <div class="input-icon search-input">
-        <AppIcon name="search" size="sm" />
-        <input v-model="search" type="search" placeholder="Rechercher (nom, ville)..." @input="onSearchInput" />
+    </div>
+
+    <div class="dash-grid kpi-strip">
+      <div class="tile tile--brand kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Cliniques</span>
+          <span class="kpi__icon"><AppIcon name="building" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ overview.total }}</p>
+          <p class="kpi__meta">structures enregistrées</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Cliniques actives</span>
+          <span class="kpi__icon"><AppIcon name="check" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ overview.active }}</p>
+          <p class="kpi__meta">visibles des patients</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Médecins rattachés</span>
+          <span class="kpi__icon"><AppIcon name="userCheck" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ overview.doctors }}</p>
+          <p class="kpi__meta">répartis dans les cliniques</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Villes couvertes</span>
+          <span class="kpi__icon"><AppIcon name="mapPin" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ overview.cities }}</p>
+          <p class="kpi__meta">où les patients peuvent consulter</p>
+        </div>
       </div>
     </div>
 
     <div class="card card--flush">
+      <div class="card__toolbar">
+        <h2 class="card__title">Liste des cliniques <span class="count-chip">{{ pagination.total }}</span></h2>
+        <div class="input-icon search-input">
+          <AppIcon name="search" size="sm" />
+          <input v-model="search" type="search" placeholder="Rechercher (nom, ville)..." @input="onSearchInput" />
+        </div>
+      </div>
       <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
           <div v-for="clinic in clinics" :key="clinic.id">
             <div class="item-row">
+              <span class="lead-icon item-row__lead" :class="{ 'lead-icon--muted': !clinic.isActive }">
+                <AppIcon name="building" />
+              </span>
               <div class="item-row__main">
-                <span class="item-row__title">{{ clinic.name }}</span>
-                <span class="item-row__meta">
-                  {{ clinic.address }}<template v-if="clinic.city"> — {{ clinic.city }}</template>
-                  · {{ (clinic.doctors || []).length }} médecin(s)
-                </span>
-                <span class="badge" :class="clinic.isActive ? 'badge--completed' : 'badge--cancelled'">
-                  {{ clinic.isActive ? 'Active' : 'Désactivée' }}
-                </span>
+                <div class="item-row__heading">
+                  <span class="item-row__title">{{ clinic.name }}</span>
+                  <span class="badge" :class="clinic.isActive ? 'badge--completed' : 'badge--cancelled'">
+                    {{ clinic.isActive ? 'Active' : 'Désactivée' }}
+                  </span>
+                </div>
+                <div class="meta-list">
+                  <span v-if="clinic.address || clinic.city" class="meta-item">
+                    <AppIcon name="mapPin" size="sm" />{{ [clinic.address, clinic.city].filter(Boolean).join(' — ') }}
+                  </span>
+                  <span class="meta-item">
+                    <AppIcon name="userCheck" size="sm" />{{ (clinic.doctors || []).length }} médecin(s)
+                  </span>
+                </div>
               </div>
               <div class="item-row__actions">
                 <button class="btn btn--ghost btn--sm" @click="toggleEdit(clinic)">
@@ -38,7 +93,7 @@
               </div>
             </div>
 
-            <div v-if="editingId === clinic.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+            <div v-if="editingId === clinic.id" class="inline-panel">
               <ClinicForm v-model="editForm" />
               <div class="field">
                 <label>
@@ -55,7 +110,7 @@
               </div>
             </div>
 
-            <div v-if="deletingId === clinic.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+            <div v-if="deletingId === clinic.id" class="inline-panel">
               <p style="margin-top: 0">
                 Confirmer la suppression de <strong>{{ clinic.name }}</strong> ? Cette action est irréversible.
               </p>
@@ -89,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineComponent, h } from 'vue';
+import { ref, computed, onMounted, defineComponent, h } from 'vue';
 import * as clinicService from '../services/clinic.service';
 import PaginationControl from '../components/PaginationControl.vue';
 import SkeletonList from '../components/SkeletonList.vue';
@@ -171,6 +226,30 @@ const ClinicForm = defineComponent({
 });
 
 const clinics = ref([]);
+
+// Compteurs de la page : calculés sur l'ensemble des cliniques (100 au plus), pas sur la page affichée.
+const allClinics = ref(null);
+const overview = computed(() => {
+  const list = allClinics.value;
+  if (!list) return { total: '–', active: '–', doctors: '–', cities: '–' };
+  const complete = list.total <= list.clinics.length;
+  const cities = new Set(list.clinics.map((c) => (c.city || '').trim().toLowerCase()).filter(Boolean));
+  return {
+    total: list.total,
+    active: complete ? list.clinics.filter((c) => c.isActive).length : '–',
+    doctors: complete ? list.clinics.reduce((sum, c) => sum + (c.doctors || []).length, 0) : '–',
+    cities: complete ? cities.size : '–',
+  };
+});
+const fetchOverview = async () => {
+  try {
+    const result = await clinicService.getClinics({ limit: 100 });
+    allClinics.value = { clinics: result.clinics, total: result.pagination?.total ?? result.clinics.length };
+  } catch {
+    allClinics.value = null;
+  }
+};
+
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });
 const search = ref('');
 const loading = ref(false);
@@ -243,7 +322,7 @@ const submit = async () => {
     await clinicService.createClinic(toPayload(form.value));
     createSuccess.value = 'Clinique enregistrée avec succès.';
     form.value = emptyForm();
-    await fetchClinics();
+    await Promise.all([fetchClinics(), fetchOverview()]);
   } catch (err) {
     createError.value = err.response?.data?.message || 'Impossible d’enregistrer cette clinique.';
   } finally {
@@ -274,7 +353,7 @@ const submitEdit = async (clinic) => {
   try {
     await clinicService.updateClinic(clinic.id, { ...toPayload(editForm.value), isActive: editForm.value.isActive });
     editingId.value = null;
-    await fetchClinics(pagination.value.page);
+    await Promise.all([fetchClinics(pagination.value.page), fetchOverview()]);
   } catch (err) {
     editError.value = err.response?.data?.message || 'Impossible de modifier cette clinique.';
   } finally {
@@ -294,7 +373,7 @@ const confirmDelete = async (clinic) => {
   try {
     await clinicService.deleteClinic(clinic.id);
     deletingId.value = null;
-    await fetchClinics(pagination.value.page);
+    await Promise.all([fetchClinics(pagination.value.page), fetchOverview()]);
   } catch (err) {
     deleteError.value = err.response?.data?.message || 'Impossible de supprimer cette clinique.';
   } finally {
@@ -302,5 +381,8 @@ const confirmDelete = async (clinic) => {
   }
 };
 
-onMounted(() => fetchClinics());
+onMounted(() => {
+  fetchClinics();
+  fetchOverview();
+});
 </script>

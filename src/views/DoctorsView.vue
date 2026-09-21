@@ -3,33 +3,93 @@
     <div class="page-header">
       <div>
         <h1>Médecins</h1>
-        <p class="page-subtitle">{{ pagination.total }} médecin(s) enregistré(s)</p>
+        <p class="page-subtitle">Annuaire des médecins et de leurs cliniques de rattachement</p>
       </div>
-      <div class="input-icon search-input">
-        <AppIcon name="search" size="sm" />
-        <input v-model="search" type="search" placeholder="Rechercher (nom, spécialité)..." @input="onSearchInput" />
+    </div>
+
+    <div class="dash-grid kpi-strip">
+      <div class="tile tile--brand kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Médecins</span>
+          <span class="kpi__icon"><AppIcon name="userCheck" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ stat(stats?.users.doctors) }}</p>
+          <p class="kpi__meta">comptes enregistrés</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Cliniques</span>
+          <span class="kpi__icon"><AppIcon name="building" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ stat(clinicsTotal) }}</p>
+          <p class="kpi__meta">structures de rattachement</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Spécialités actives</span>
+          <span class="kpi__icon"><AppIcon name="clipboard" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ specialities.length ? activeSpecialities.length : '–' }}</p>
+          <p class="kpi__meta">proposées aux patients</p>
+        </div>
+      </div>
+      <div class="tile kpi span-3">
+        <div class="kpi__head">
+          <span class="kpi__label">Patients par médecin</span>
+          <span class="kpi__icon"><AppIcon name="users" /></span>
+        </div>
+        <div>
+          <p class="kpi__value">{{ ratio }}</p>
+          <p class="kpi__meta">{{ stat(stats?.users.patients) }} patients</p>
+        </div>
       </div>
     </div>
 
     <div class="card card--flush">
+      <div class="card__toolbar">
+        <h2 class="card__title">Liste des médecins <span class="count-chip">{{ pagination.total }}</span></h2>
+        <div class="input-icon search-input">
+          <AppIcon name="search" size="sm" />
+          <input v-model="search" type="search" placeholder="Rechercher (nom, spécialité)..." @input="onSearchInput" />
+        </div>
+      </div>
       <SkeletonList v-if="loading" />
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
           <div v-for="doctor in doctors" :key="doctor.id">
             <div class="item-row">
+              <span class="avatar item-row__lead" :class="{ 'avatar--muted': !doctor.isActive }" aria-hidden="true">
+                {{ initialsOf(doctor) }}
+              </span>
               <div class="item-row__main">
-                <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
-                <span class="item-row__meta">
-                  {{ doctor.speciality || 'Médecine générale' }} — {{ doctor.phoneNumber }}
-                  <template v-if="doctor.clinic"> — {{ doctor.clinic.name }}</template>
-                </span>
-                <span class="item-row__meta" v-if="doctor.medicalOrderNumber">
-                  N° Ordre des médecins du Cameroun : {{ doctor.medicalOrderNumber }}
-                </span>
-                <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
-                  {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
-                </span>
+                <div class="item-row__heading">
+                  <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
+                  <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
+                    {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
+                  </span>
+                </div>
+                <div class="chips">
+                  <span class="chip">{{ doctor.speciality || 'Médecine générale' }}</span>
+                </div>
+                <div class="meta-list">
+                  <span class="meta-item"><AppIcon name="phone" size="sm" />{{ doctor.phoneNumber }}</span>
+                  <span v-if="doctor.clinic" class="meta-item">
+                    <AppIcon name="building" size="sm" />{{ doctor.clinic.name }}
+                  </span>
+                  <span
+                    v-if="doctor.medicalOrderNumber"
+                    class="meta-item"
+                    title="N° d'inscription à l'Ordre des médecins du Cameroun"
+                  >
+                    <AppIcon name="fileText" size="sm" />Ordre : {{ doctor.medicalOrderNumber }}
+                  </span>
+                </div>
               </div>
               <RowActions
                 :title="`Dr ${doctor.firstName} ${doctor.lastName}`"
@@ -38,7 +98,7 @@
               />
             </div>
 
-            <div v-if="editingId === doctor.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+            <div v-if="editingId === doctor.id" class="inline-panel">
               <div class="form-grid">
                 <div class="field">
                   <label>Prénom</label>
@@ -80,7 +140,7 @@
               </div>
             </div>
 
-            <div v-if="deletingId === doctor.id" class="card" style="margin-top: var(--space-2); background: var(--color-bg)">
+            <div v-if="deletingId === doctor.id" class="inline-panel">
               <p style="margin-top: 0">
                 Confirmer la suppression de <strong>Dr {{ doctor.firstName }} {{ doctor.lastName }}</strong> ?
                 Cette action est irréversible.
@@ -214,6 +274,8 @@ import { ref, computed, onMounted } from 'vue';
 import * as doctorService from '../services/doctor.service';
 import * as clinicService from '../services/clinic.service';
 import * as specialityService from '../services/speciality.service';
+import * as adminService from '../services/admin.service';
+import { formatNumber, initialsOf } from '../utils/format';
 import { useAuthStore } from '../store/auth.store';
 import PaginationControl from '../components/PaginationControl.vue';
 import SkeletonList from '../components/SkeletonList.vue';
@@ -233,6 +295,13 @@ const viewClinicFromDoctor = () => {
   viewingDoctor.value = null;
 };
 const clinics = ref([]);
+const clinicsTotal = ref(null);
+const stats = ref(null);
+const stat = (value) => (value == null ? '–' : formatNumber(value));
+const ratio = computed(() => {
+  const doctors = stats.value?.users.doctors;
+  return doctors ? formatNumber(Math.round(stats.value.users.patients / doctors)) : '–';
+});
 const specialities = ref([]);
 const activeSpecialities = computed(() => specialities.value.filter((s) => s.isActive));
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });
@@ -264,6 +333,7 @@ const editError = ref('');
 const fetchClinics = async () => {
   const result = await clinicService.getClinics({ limit: 100 });
   clinics.value = result.clinics;
+  clinicsTotal.value = result.pagination?.total ?? result.clinics.length;
 };
 
 const fetchSpecialities = async () => {
@@ -399,5 +469,11 @@ onMounted(() => {
   fetchDoctors();
   fetchClinics();
   fetchSpecialities();
+  adminService
+    .getStats()
+    .then((result) => {
+      stats.value = result;
+    })
+    .catch(() => {});
 });
 </script>

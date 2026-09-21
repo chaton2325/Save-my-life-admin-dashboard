@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <div class="page page--narrow">
     <div class="page-header">
       <div>
         <h1>Je ne sais pas quel spécialiste consulter</h1>

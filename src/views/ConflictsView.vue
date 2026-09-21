@@ -10,10 +10,13 @@
     <p v-if="loading" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
     <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
     <template v-else>
-      <div v-for="(conflict, index) in conflicts" :key="index" class="card" style="margin-bottom: var(--space-4)">
-        <p class="page-subtitle" style="margin-bottom: var(--space-3)">
-          Même médecin, créneaux qui se chevauchent — Dr {{ conflict.appointmentA.doctor?.firstName }}
-          {{ conflict.appointmentA.doctor?.lastName }}
+      <div v-for="(conflict, index) in conflicts" :key="index" class="card card--flush" style="margin-bottom: var(--space-4)">
+        <p class="conflict-head">
+          <AppIcon name="alertTriangle" size="sm" />
+          <span>
+            Même médecin, créneaux qui se chevauchent — Dr {{ conflict.appointmentA.doctor?.firstName }}
+            {{ conflict.appointmentA.doctor?.lastName }}
+          </span>
         </p>
         <div class="item-list">
           <div v-for="appt in [conflict.appointmentA, conflict.appointmentB]" :key="appt.id" class="item-row">
@@ -41,6 +44,7 @@
 import { ref, onMounted } from 'vue';
 import * as appointmentService from '../services/appointment.service';
 import { useAuthStore } from '../store/auth.store';
+import AppIcon from '../components/AppIcon.vue';
 
 const authStore = useAuthStore();
 const conflicts = ref([]);

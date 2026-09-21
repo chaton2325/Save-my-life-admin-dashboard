@@ -12,12 +12,17 @@
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
-          <div v-for="p in prescriptions" :key="p.id" class="item-row" style="align-items: flex-start">
+          <div v-for="p in prescriptions" :key="p.id" class="item-row">
+            <span class="lead-icon item-row__lead"><AppIcon name="fileText" /></span>
             <div class="item-row__main">
-              <span class="item-row__title">Dr {{ p.doctor?.firstName }} {{ p.doctor?.lastName }} — {{ formatDate(p.issuedAt) }}</span>
-              <span class="item-row__meta">
-                {{ (p.medications || []).map((m) => m.name).join(', ') || 'Aucun médicament listé' }}
-              </span>
+              <span class="item-row__title">Dr {{ p.doctor?.firstName }} {{ p.doctor?.lastName }}</span>
+              <div class="meta-list">
+                <span class="meta-item"><AppIcon name="calendar" size="sm" />{{ formatDate(p.issuedAt) }}</span>
+              </div>
+              <div class="chips">
+                <span v-for="(m, index) in p.medications || []" :key="index" class="chip">{{ m.name }}</span>
+                <span v-if="!(p.medications || []).length" class="item-row__meta">Aucun médicament listé</span>
+              </div>
             </div>
             <div class="item-row__actions">
               <button class="btn btn--ghost btn--sm" @click="download(p.id)">
