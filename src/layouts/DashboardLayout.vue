@@ -43,6 +43,7 @@
     </aside>
 
     <main class="content">
+      <EmailBanner />
       <RouterView v-slot="{ Component }">
         <Transition :name="pageTransition" mode="out-in">
           <component :is="Component" />
@@ -117,6 +118,7 @@ import { navSectionsFor, tabItemsFor, moreItemsFor, ACCOUNT_NAV } from '../confi
 import AppIcon from '../components/AppIcon.vue';
 import MobileTabBar from '../components/MobileTabBar.vue';
 import AppSheet from '../components/AppSheet.vue';
+import EmailBanner from '../components/EmailBanner.vue';
 import logo from '../assets/logo.jpeg';
 
 const authStore = useAuthStore();

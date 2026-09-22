@@ -29,3 +29,9 @@ export const dateParts = (value) => {
     time: date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
   };
 };
+
+/** « amina.nkodo@gmail.com » -> « a***@gmail.com » (même règle que le serveur). */
+export const maskEmail = (email) => {
+  const [local = '', domain = ''] = String(email || '').split('@');
+  return `${local.slice(0, 1)}***@${domain}`;
+};

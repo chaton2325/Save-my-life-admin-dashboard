@@ -6,7 +6,7 @@
       <form class="auth-form" @submit.prevent="handleSubmit">
         <div class="auth-form__header">
           <h2>Créer un compte</h2>
-          <p>Inscrivez-vous avec votre numéro de téléphone</p>
+          <p>Inscrivez-vous avec votre email : nous vous enverrons un code pour le confirmer</p>
         </div>
 
         <div class="field-row">
@@ -17,6 +17,21 @@
           <div class="field">
             <label for="lastName">Nom</label>
             <input id="lastName" v-model="lastName" type="text" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Adresse email</label>
+          <div class="input-icon">
+            <AppIcon name="mail" size="sm" />
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              autocomplete="email"
+              placeholder="vous@exemple.com"
+              required
+            />
           </div>
         </div>
 
@@ -90,6 +105,7 @@ import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
 const firstName = ref('');
 const lastName = ref('');
+const email = ref('');
 const phoneNumber = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -108,13 +124,14 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    const { phoneNumber: verifiedPhone, otpCode } = await authService.register({
+    const result = await authService.register({
       firstName: firstName.value,
       lastName: lastName.value,
       phoneNumber: phoneNumber.value,
+      email: email.value.trim(),
       password: password.value,
     });
-    router.push({ name: 'verify-phone', query: { phoneNumber: verifiedPhone, otpCode } });
+    router.push({ name: 'verify-code', query: { email: email.value.trim(), hint: result.email } });
   } catch (err) {
     errorMessage.value = errorMessageOf(err, 'Inscription impossible.');
   } finally {

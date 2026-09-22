@@ -25,16 +25,31 @@
             type="button"
             class="segmented__option"
             role="tab"
-            :class="{ 'is-active': method === 'sms' }"
-            :aria-selected="method === 'sms'"
-            @click="switchMethod('sms')"
+            :class="{ 'is-active': method === 'email' }"
+            :aria-selected="method === 'email'"
+            @click="switchMethod('email')"
           >
-            <AppIcon name="messageCircle" size="sm" />
-            Code SMS
+            <AppIcon name="mail" size="sm" />
+            Code par email
           </button>
         </div>
 
-        <div class="field">
+        <div v-if="method === 'email'" class="field">
+          <label for="email">Adresse email</label>
+          <div class="input-icon">
+            <AppIcon name="mail" size="sm" />
+            <input
+              id="email"
+              v-model="email"
+              type="email"
+              autocomplete="email"
+              placeholder="vous@exemple.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div v-else class="field">
           <label for="phoneNumber">Numéro de téléphone</label>
           <div class="input-icon">
             <AppIcon name="phone" size="sm" />
@@ -56,8 +71,8 @@
           </div>
         </div>
         <p v-else class="field-hint">
-          <AppIcon name="messageCircle" size="sm" />
-          Un code à 6 chiffres vous sera envoyé par SMS pour vous connecter sans mot de passe.
+          <AppIcon name="mail" size="sm" />
+          Un code à 6 chiffres vous sera envoyé par email pour vous connecter sans mot de passe.
         </p>
 
         <p v-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
@@ -88,6 +103,7 @@ import AppIcon from '../components/AppIcon.vue';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
 
 const method = ref('password');
+const email = ref('');
 const phoneNumber = ref('');
 const password = ref('');
 const loading = ref(false);
@@ -98,9 +114,9 @@ const router = useRouter();
 
 const submitLabel = computed(() => {
   if (loading.value) {
-    return method.value === 'sms' ? 'Envoi du code...' : 'Connexion...';
+    return method.value === 'email' ? 'Envoi du code...' : 'Connexion...';
   }
-  return method.value === 'sms' ? 'Recevoir le code' : 'Se connecter';
+  return method.value === 'email' ? 'Recevoir le code' : 'Se connecter';
 });
 
 const switchMethod = (value) => {
@@ -108,25 +124,28 @@ const switchMethod = (value) => {
   errorMessage.value = '';
 };
 
-const goToVerification = (phone, otpCode) => {
-  router.push({ name: 'verify-phone', query: { phoneNumber: phone, otpCode } });
+// Le code est déjà parti (connexion par code) ou doit l'être à l'arrivée (compte à confirmer).
+const goToVerification = (query) => {
+  router.push({ name: 'verify-code', query });
 };
 
 const handleSubmit = async () => {
   errorMessage.value = '';
   loading.value = true;
   try {
-    if (method.value === 'sms') {
-      const result = await authService.resendCode(phoneNumber.value);
-      goToVerification(result.phoneNumber, result.otpCode);
+    if (method.value === 'email') {
+      const result = await authService.resendCode({ email: email.value.trim() });
+      goToVerification({ email: email.value.trim(), hint: result.email });
       return;
     }
 
     await authStore.login(phoneNumber.value, password.value);
     router.push(authStore.isAdmin ? '/patients' : '/accueil');
   } catch (err) {
-    if (err.response?.data?.details?.requiresVerification) {
-      goToVerification(phoneNumber.value);
+    const details = err.response?.data?.details;
+    if (details?.requiresVerification) {
+      // Compte inscrit mais jamais confirmé : on envoie le code et on l'attend sur l'écran suivant.
+      goToVerification({ phoneNumber: phoneNumber.value, hint: details.email || '', send: '1' });
       return;
     }
     errorMessage.value = errorMessageOf(err, 'Connexion impossible.');

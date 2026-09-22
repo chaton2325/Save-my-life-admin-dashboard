@@ -9,7 +9,8 @@
             <h1>Bonjour, {{ authStore.user?.firstName }}</h1>
             <p class="identity__meta">
               <span v-if="authStore.user?.phoneNumber">{{ authStore.user.phoneNumber }}</span>
-              <span class="badge badge--completed">Numéro vérifié</span>
+              <span v-if="authStore.user?.emailVerified" class="badge badge--completed">Email vérifié</span>
+              <span v-else-if="authStore.user?.phoneVerified" class="badge badge--completed">Numéro vérifié</span>
             </p>
           </div>
         </div>
@@ -81,7 +82,15 @@
           <div class="form-grid">
             <div class="field">
               <label>Email</label>
-              <input v-model="form.email" type="email" placeholder="vous@exemple.com" />
+              <div class="field__row">
+                <input :value="authStore.user?.email || ''" type="email" readonly placeholder="Aucun email" />
+                <button type="button" class="btn btn--ghost" @click="emailModalOpen = true">
+                  {{ authStore.user?.emailVerified ? 'Modifier' : authStore.user?.email ? 'Confirmer' : 'Ajouter' }}
+                </button>
+              </div>
+              <p class="field__note">
+                {{ authStore.user?.emailVerified ? 'Adresse confirmée.' : 'Un code de confirmation vous sera envoyé.' }}
+              </p>
             </div>
             <div class="field">
               <label>Date de naissance</label>
@@ -136,6 +145,12 @@
         </div>
       </details>
     </div>
+
+    <EmailVerificationModal
+      v-if="emailModalOpen"
+      :initial-email="authStore.user?.pendingEmail || authStore.user?.email || ''"
+      @close="emailModalOpen = false"
+    />
   </div>
 </template>
 
@@ -150,14 +165,17 @@ import * as messageService from '../services/message.service';
 import { todayLabel } from '../utils/format';
 import AppIcon from '../components/AppIcon.vue';
 import GaugeChart from '../components/GaugeChart.vue';
+import EmailVerificationModal from '../components/EmailVerificationModal.vue';
 
 const authStore = useAuthStore();
 const loading = ref(false);
 const successMessage = ref('');
 const errorMessage = ref('');
 
+const emailModalOpen = ref(false);
+
+// L'email n'est plus dans ce formulaire : il ne change qu'avec un code de confirmation.
 const form = ref({
-  email: authStore.user?.email || '',
   birthDate: authStore.user?.birthDate || '',
   gender: authStore.user?.gender || '',
   address: authStore.user?.address || '',
@@ -177,9 +195,12 @@ const initials = computed(() => {
 const today = todayLabel();
 
 // Indique d'un coup d'œil ce qu'il reste à renseigner, sans ouvrir le formulaire.
-const totalCount = computed(() => Object.keys(form.value).length);
+// Le compte compte aussi l'email confirmé parmi les informations à renseigner.
+const totalCount = computed(() => Object.keys(form.value).length + 1);
 const missingCount = computed(
-  () => Object.values(form.value).filter((value) => !String(value || '').trim()).length
+  () =>
+    Object.values(form.value).filter((value) => !String(value || '').trim()).length +
+    (authStore.user?.emailVerified ? 0 : 1)
 );
 const filledCount = computed(() => totalCount.value - missingCount.value);
 const completion = computed(() => Math.round((filledCount.value / totalCount.value) * 100));

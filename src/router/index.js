@@ -10,8 +10,8 @@ const routes = [
   { path: '/inscription', name: 'register', component: () => import('../views/RegisterView.vue') },
   {
     path: '/verification',
-    name: 'verify-phone',
-    component: () => import('../views/VerifyPhoneView.vue'),
+    name: 'verify-code',
+    component: () => import('../views/VerifyCodeView.vue'),
   },
   {
     path: '/politique-de-confidentialite',
@@ -82,7 +82,7 @@ const landingRouteFor = (authStore) => {
 
 router.beforeEach((to) => {
   const authStore = useAuthStore();
-  const isAuthPage = ['login', 'register', 'verify-phone'].includes(to.name);
+  const isAuthPage = ['login', 'register', 'verify-code'].includes(to.name);
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return { name: 'login' };
