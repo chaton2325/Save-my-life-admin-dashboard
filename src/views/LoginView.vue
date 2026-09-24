@@ -65,10 +65,7 @@
 
         <div v-if="method === 'password'" class="field">
           <label for="password">Mot de passe</label>
-          <div class="input-icon">
-            <AppIcon name="lock" size="sm" />
-            <input id="password" v-model="password" type="password" placeholder="••••••••" required />
-          </div>
+          <PasswordInput id="password" v-model="password" placeholder="••••••••" required />
         </div>
         <p v-else class="field-hint">
           <AppIcon name="mail" size="sm" />
@@ -101,6 +98,7 @@ import * as authService from '../services/auth.service';
 import { errorMessageOf } from '../services/api';
 import AppIcon from '../components/AppIcon.vue';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
+import PasswordInput from '../components/PasswordInput.vue';
 
 const method = ref('password');
 const email = ref('');

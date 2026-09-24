@@ -69,7 +69,7 @@
               </span>
               <div class="item-row__main">
                 <div class="item-row__heading">
-                  <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
+                  <span class="item-row__title">{{ doctor.firstName }} {{ doctor.lastName }}</span>
                   <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
                     {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
                   </span>
@@ -92,7 +92,7 @@
                 </div>
               </div>
               <RowActions
-                :title="`Dr ${doctor.firstName} ${doctor.lastName}`"
+                :title="`${doctor.firstName} ${doctor.lastName}`"
                 :actions="doctorActions(doctor)"
                 @select="(key) => runDoctorAction(key, doctor)"
               />
@@ -142,7 +142,7 @@
 
             <div v-if="deletingId === doctor.id" class="inline-panel">
               <p style="margin-top: 0">
-                Confirmer la suppression de <strong>Dr {{ doctor.firstName }} {{ doctor.lastName }}</strong> ?
+                Confirmer la suppression de <strong>{{ doctor.firstName }} {{ doctor.lastName }}</strong> ?
                 Cette action est irréversible.
               </p>
               <p v-if="deleteError" class="alert alert--error">{{ deleteError }}</p>
@@ -211,7 +211,7 @@
       </button>
     </CreatePanel>
 
-    <Modal v-if="viewingDoctor" :title="`Dr ${viewingDoctor.firstName} ${viewingDoctor.lastName}`" @close="viewingDoctor = null">
+    <Modal v-if="viewingDoctor" :title="`${viewingDoctor.firstName} ${viewingDoctor.lastName}`" @close="viewingDoctor = null">
       <dl class="profile-list">
         <div class="profile-row">
           <dt>Statut</dt>

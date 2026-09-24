@@ -51,31 +51,12 @@
 
         <div class="field">
           <label for="password">Mot de passe</label>
-          <div class="input-icon">
-            <AppIcon name="lock" size="sm" />
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              placeholder="••••••••"
-              minlength="6"
-              required
-            />
-          </div>
+          <PasswordInput id="password" v-model="password" placeholder="••••••••" minlength="6" required />
         </div>
 
         <div class="field">
           <label for="confirmPassword">Confirmer le mot de passe</label>
-          <div class="input-icon">
-            <AppIcon name="lock" size="sm" />
-            <input
-              id="confirmPassword"
-              v-model="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          <PasswordInput id="confirmPassword" v-model="confirmPassword" placeholder="••••••••" required />
         </div>
 
         <p v-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
@@ -102,6 +83,7 @@ import * as authService from '../services/auth.service';
 import { errorMessageOf } from '../services/api';
 import AppIcon from '../components/AppIcon.vue';
 import AuthBrandPanel from '../components/AuthBrandPanel.vue';
+import PasswordInput from '../components/PasswordInput.vue';
 
 const firstName = ref('');
 const lastName = ref('');

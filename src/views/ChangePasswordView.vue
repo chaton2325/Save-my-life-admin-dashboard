@@ -10,24 +10,15 @@
     <div class="card card--narrow">
       <div class="field">
         <label>Mot de passe actuel</label>
-        <div class="input-icon">
-          <AppIcon name="lock" size="sm" />
-          <input v-model="currentPassword" type="password" placeholder="••••••••" />
-        </div>
+        <PasswordInput v-model="currentPassword" placeholder="••••••••" />
       </div>
       <div class="field">
         <label>Nouveau mot de passe</label>
-        <div class="input-icon">
-          <AppIcon name="lock" size="sm" />
-          <input v-model="newPassword" type="password" minlength="6" placeholder="••••••••" />
-        </div>
+        <PasswordInput v-model="newPassword" minlength="6" placeholder="••••••••" />
       </div>
       <div class="field">
         <label>Confirmer le nouveau mot de passe</label>
-        <div class="input-icon">
-          <AppIcon name="lock" size="sm" />
-          <input v-model="confirmPassword" type="password" minlength="6" placeholder="••••••••" />
-        </div>
+        <PasswordInput v-model="confirmPassword" minlength="6" placeholder="••••••••" />
       </div>
 
       <p v-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
@@ -45,7 +36,7 @@
 import { ref } from 'vue';
 import * as authService from '../services/auth.service';
 import { errorMessageOf } from '../services/api';
-import AppIcon from '../components/AppIcon.vue';
+import PasswordInput from '../components/PasswordInput.vue';
 
 const currentPassword = ref('');
 const newPassword = ref('');
