@@ -29,7 +29,7 @@
         <dt>Médecins</dt>
         <dd>
           <div v-for="doctor in clinic.doctors" :key="doctor.id">
-            Dr {{ doctor.firstName }} {{ doctor.lastName }} — {{ doctor.speciality || 'Médecine générale' }}
+            {{ doctor.firstName }} {{ doctor.lastName }} — {{ doctor.speciality || 'Médecine générale' }}
           </div>
         </dd>
       </div>

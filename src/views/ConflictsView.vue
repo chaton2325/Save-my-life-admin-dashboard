@@ -14,7 +14,7 @@
         <p class="conflict-head">
           <AppIcon name="alertTriangle" size="sm" />
           <span>
-            Même médecin, créneaux qui se chevauchent — Dr {{ conflict.appointmentA.doctor?.firstName }}
+            Même médecin, créneaux qui se chevauchent — {{ conflict.appointmentA.doctor?.firstName }}
             {{ conflict.appointmentA.doctor?.lastName }}
           </span>
         </p>

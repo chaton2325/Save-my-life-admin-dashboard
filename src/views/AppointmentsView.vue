@@ -47,7 +47,7 @@
               </div>
             <div class="item-row__main">
               <div class="item-row__heading">
-                <span class="item-row__title">Dr {{ appt.doctor?.firstName }} {{ appt.doctor?.lastName }}</span>
+                <span class="item-row__title">{{ appt.doctor?.firstName }} {{ appt.doctor?.lastName }}</span>
                 <span class="badge" :class="`badge--${appt.status}`">{{ statusLabel(appt.status) }}</span>
               </div>
               <div v-if="appt.doctor?.speciality" class="chips">
@@ -62,7 +62,7 @@
             </div>
             <RowActions
               v-if="appointmentActions(appt).length"
-              :title="`Dr ${appt.doctor?.firstName} ${appt.doctor?.lastName}`"
+              :title="`${appt.doctor?.firstName} ${appt.doctor?.lastName}`"
               :actions="appointmentActions(appt)"
               @select="(key) => runAppointmentAction(key, appt)"
             />
@@ -110,7 +110,7 @@
 
     <Modal
       v-if="itineraryAppointment"
-      :title="`Itinéraire — Dr ${itineraryAppointment.doctor?.firstName} ${itineraryAppointment.doctor?.lastName}`"
+      :title="`Itinéraire — ${itineraryAppointment.doctor?.firstName} ${itineraryAppointment.doctor?.lastName}`"
       @close="itineraryAppointment = null"
     >
       <p class="hint" style="margin-top: 0">

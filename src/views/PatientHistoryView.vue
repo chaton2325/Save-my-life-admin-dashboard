@@ -48,7 +48,7 @@
           </div>
           <div class="item-row__main">
             <div class="item-row__heading">
-              <span class="item-row__title">Dr {{ report.doctor?.firstName }} {{ report.doctor?.lastName }}</span>
+              <span class="item-row__title">{{ report.doctor?.firstName }} {{ report.doctor?.lastName }}</span>
               <span v-if="report.diagnosis" class="chip">{{ report.diagnosis }}</span>
             </div>
             <span v-if="report.notes" class="item-row__meta">{{ report.notes }}</span>

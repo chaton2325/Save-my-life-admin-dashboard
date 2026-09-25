@@ -86,7 +86,7 @@
           <div class="item-list">
             <div v-for="doctor in entry.doctors" :key="doctor.id" class="item-row">
               <div class="item-row__main">
-                <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
+                <span class="item-row__title">{{ doctor.firstName }} {{ doctor.lastName }}</span>
                 <span class="item-row__meta">{{ doctor.speciality }}</span>
               </div>
               <button class="btn btn--primary btn--sm" @click="bookWith(doctor)">Prendre rendez-vous</button>

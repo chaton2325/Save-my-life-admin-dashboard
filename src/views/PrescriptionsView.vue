@@ -15,7 +15,7 @@
           <div v-for="p in prescriptions" :key="p.id" class="item-row">
             <span class="lead-icon item-row__lead"><AppIcon name="fileText" /></span>
             <div class="item-row__main">
-              <span class="item-row__title">Dr {{ p.doctor?.firstName }} {{ p.doctor?.lastName }}</span>
+              <span class="item-row__title">{{ p.doctor?.firstName }} {{ p.doctor?.lastName }}</span>
               <div class="meta-list">
                 <span class="meta-item"><AppIcon name="calendar" size="sm" />{{ formatDate(p.issuedAt) }}</span>
               </div>
