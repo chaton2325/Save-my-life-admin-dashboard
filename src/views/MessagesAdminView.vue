@@ -15,13 +15,18 @@
       <div v-else class="card card--flush">
         <div class="item-list">
         <div v-for="thread in threads" :key="thread.user.id" class="item-row" style="cursor: pointer" @click="openThread(thread.user.id)">
-          <span class="avatar item-row__lead" :class="{ 'avatar--muted': thread.unreadCount === 0 }" aria-hidden="true">
-            {{ initialsOf(thread.user) }}
+          <span class="item-row__lead" @click.stop>
+            <Avatar
+              :photo-url="thread.user.photoUrl"
+              :label="`${thread.user.firstName} ${thread.user.lastName}`"
+              :initials="initialsOf(thread.user)"
+              :muted="thread.unreadCount === 0"
+            />
           </span>
           <div class="item-row__main">
             <div class="item-row__heading">
               <span class="item-row__title">{{ thread.user.firstName }} {{ thread.user.lastName }}</span>
-              <span v-if="thread.user.role" class="chip chip--muted">{{ roleLabel(thread.user.role) }}</span>
+              <span v-if="thread.user.role" class="chip chip--muted">{{ roleLabel(thread.user) }}</span>
             </div>
             <span v-if="thread.user.phoneNumber" class="item-row__meta">{{ thread.user.phoneNumber }}</span>
             <span class="item-row__meta item-row__meta--clamp">{{ thread.lastMessage.body }}</span>
@@ -65,6 +70,7 @@
 import { ref, nextTick, onMounted } from 'vue';
 import * as messageService from '../services/message.service';
 import AppIcon from '../components/AppIcon.vue';
+import Avatar from '../components/Avatar.vue';
 import { initialsOf } from '../utils/format';
 
 const threads = ref([]);
@@ -78,7 +84,10 @@ const draft = ref('');
 const sending = ref(false);
 const listEl = ref(null);
 
-const roleLabel = (role) => ({ patient: 'Patient', medecin: 'Médecin' }[role] || role);
+const roleLabel = (user) => {
+  if (user.role === 'medecin') return user.isOptician ? 'Opticien' : 'Médecin';
+  return user.role === 'patient' ? 'Patient' : user.role;
+};
 const formatTime = (value) => new Date(value).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
 
 const scrollToBottom = () => {

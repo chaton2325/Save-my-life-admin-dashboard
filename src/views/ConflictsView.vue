@@ -14,8 +14,7 @@
         <p class="conflict-head">
           <AppIcon name="alertTriangle" size="sm" />
           <span>
-            Même médecin, créneaux qui se chevauchent — {{ conflict.appointmentA.doctor?.firstName }}
-            {{ conflict.appointmentA.doctor?.lastName }}
+            Même médecin, créneaux qui se chevauchent — {{ doctorLabel(conflict.appointmentA.doctor) }}
           </span>
         </p>
         <div class="item-list">
@@ -45,6 +44,7 @@ import { ref, onMounted } from 'vue';
 import * as appointmentService from '../services/appointment.service';
 import { useAuthStore } from '../store/auth.store';
 import AppIcon from '../components/AppIcon.vue';
+import { doctorLabel } from '../utils/format';
 
 const authStore = useAuthStore();
 const conflicts = ref([]);

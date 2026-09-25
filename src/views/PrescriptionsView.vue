@@ -15,7 +15,7 @@
           <div v-for="p in prescriptions" :key="p.id" class="item-row">
             <span class="lead-icon item-row__lead"><AppIcon name="fileText" /></span>
             <div class="item-row__main">
-              <span class="item-row__title">{{ p.doctor?.firstName }} {{ p.doctor?.lastName }}</span>
+              <span class="item-row__title">{{ doctorLabel(p.doctor) }}</span>
               <div class="meta-list">
                 <span class="meta-item"><AppIcon name="calendar" size="sm" />{{ formatDate(p.issuedAt) }}</span>
               </div>
@@ -44,6 +44,7 @@ import { ref, onMounted } from 'vue';
 import * as prescriptionService from '../services/prescription.service';
 import PaginationControl from '../components/PaginationControl.vue';
 import AppIcon from '../components/AppIcon.vue';
+import { doctorLabel } from '../utils/format';
 
 const prescriptions = ref([]);
 const pagination = ref({ page: 1, totalPages: 1, total: 0, limit: 10 });

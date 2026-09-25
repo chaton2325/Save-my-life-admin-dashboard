@@ -20,7 +20,7 @@
 
       <div class="sidebar-footer">
         <p class="admin-name">
-          <span class="avatar">{{ initials }}</span>
+          <Avatar :photo-url="authStore.user?.photoUrl" :label="fullName" :initials="initials" />
           <span class="admin-name__meta">
             <span class="admin-name__name">{{ fullName }}</span>
             <span class="role-label">{{ roleLabel }}</span>
@@ -62,7 +62,7 @@
 
     <AppSheet :open="moreOpen" title="Menu" @close="moreOpen = false">
       <p class="admin-name" style="margin-bottom: var(--space-4)">
-        <span class="avatar">{{ initials }}</span>
+        <Avatar :photo-url="authStore.user?.photoUrl" :label="fullName" :initials="initials" />
         <span class="admin-name__meta">
           <span class="admin-name__name">{{ fullName }}</span>
           <span class="role-label">{{ roleLabel }}</span>
@@ -119,6 +119,7 @@ import AppIcon from '../components/AppIcon.vue';
 import MobileTabBar from '../components/MobileTabBar.vue';
 import AppSheet from '../components/AppSheet.vue';
 import EmailBanner from '../components/EmailBanner.vue';
+import Avatar from '../components/Avatar.vue';
 import logo from '../assets/logo.jpeg';
 
 const authStore = useAuthStore();
@@ -174,7 +175,7 @@ const fullName = computed(() =>
 
 const roleLabel = computed(() => {
   if (authStore.isPatient) return 'Patient';
-  if (authStore.isDoctor) return authStore.user?.speciality || 'Médecin';
+  if (authStore.isDoctor) return authStore.user?.speciality || (authStore.user?.isOptician ? 'Opticien' : 'Médecin');
   if (authStore.isAdmin) return ADMIN_LEVEL_LABELS[authStore.user?.adminLevel] || 'Administrateur';
   return '';
 });

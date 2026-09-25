@@ -64,7 +64,12 @@
               <tr v-for="patient in patients" :key="patient.id">
                 <td class="td--primary">
                   <div class="patient-cell">
-                    <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
+                    <Avatar
+                      :photo-url="patient.photoUrl"
+                      :label="`${patient.firstName} ${patient.lastName}`"
+                      :initials="getInitials(patient)"
+                      muted
+                    />
                     <span>{{ patient.firstName }} {{ patient.lastName }}</span>
                   </div>
                 </td>
@@ -95,6 +100,7 @@ import * as appointmentService from '../services/appointment.service';
 import PaginationControl from '../components/PaginationControl.vue';
 import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
+import Avatar from '../components/Avatar.vue';
 
 const patients = ref([]);
 const totalPatients = ref(null);

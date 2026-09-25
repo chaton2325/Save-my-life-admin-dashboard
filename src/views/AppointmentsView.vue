@@ -47,7 +47,7 @@
               </div>
             <div class="item-row__main">
               <div class="item-row__heading">
-                <span class="item-row__title">{{ appt.doctor?.firstName }} {{ appt.doctor?.lastName }}</span>
+                <span class="item-row__title">{{ doctorLabel(appt.doctor) }}</span>
                 <span class="badge" :class="`badge--${appt.status}`">{{ statusLabel(appt.status) }}</span>
               </div>
               <div v-if="appt.doctor?.speciality" class="chips">
@@ -62,7 +62,7 @@
             </div>
             <RowActions
               v-if="appointmentActions(appt).length"
-              :title="`${appt.doctor?.firstName} ${appt.doctor?.lastName}`"
+              :title="doctorLabel(appt.doctor)"
               :actions="appointmentActions(appt)"
               @select="(key) => runAppointmentAction(key, appt)"
             />
@@ -110,7 +110,7 @@
 
     <Modal
       v-if="itineraryAppointment"
-      :title="`Itinéraire — ${itineraryAppointment.doctor?.firstName} ${itineraryAppointment.doctor?.lastName}`"
+      :title="`Itinéraire — ${doctorLabel(itineraryAppointment.doctor)}`"
       @close="itineraryAppointment = null"
     >
       <p class="hint" style="margin-top: 0">
@@ -171,7 +171,7 @@ import Modal from '../components/Modal.vue';
 import ItineraryMap from '../components/ItineraryMap.vue';
 import RowActions from '../components/RowActions.vue';
 import { haversineKm, googleMapsDirectionsUrl } from '../utils/geo';
-import { dateParts } from '../utils/format';
+import { dateParts, doctorLabel } from '../utils/format';
 
 const appointments = ref([]);
 

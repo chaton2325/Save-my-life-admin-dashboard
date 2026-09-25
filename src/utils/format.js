@@ -19,6 +19,15 @@ export const todayLabel = () => {
 export const initialsOf = (person) =>
   ((person?.firstName?.[0] || '') + (person?.lastName?.[0] || '')).toUpperCase();
 
+/**
+ * Nom affiché d'un praticien : préfixé « Dr » pour un médecin, sans préfixe
+ * pour un opticien (même compte, juste isOptician=true).
+ */
+export const doctorLabel = (doctor) => {
+  const prefix = doctor?.isOptician ? '' : 'Dr ';
+  return `${prefix}${doctor?.firstName || ''} ${doctor?.lastName || ''}`.trim();
+};
+
 /** Jour + mois court + heure d'une date, pour la pastille de date d'une ligne. */
 export const dateParts = (value) => {
   const date = new Date(value);

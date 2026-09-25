@@ -135,6 +135,7 @@ const ADMIN_NAV = [
   },
   { to: '/patients', icon: 'users', label: 'Patients', short: 'Patients', section: 'Annuaire', tab: true },
   { to: '/medecins', icon: 'userCheck', label: 'Médecins', short: 'Médecins', section: 'Annuaire', tab: true },
+  { to: '/opticiens', icon: 'eye', label: 'Opticiens', short: 'Opticiens', section: 'Annuaire' },
   { to: '/cliniques', icon: 'building', label: 'Cliniques', short: 'Cliniques', section: 'Annuaire', tab: true },
   {
     to: '/administrateurs',
@@ -190,6 +191,7 @@ export const MAX_TABS = 4;
 
 /** Liens toujours accessibles, regroupés dans le menu « Plus » / bas de sidebar. */
 export const ACCOUNT_NAV = [
+  { to: '/mon-profil', icon: 'camera', label: 'Mon profil', short: 'Profil' },
   { to: '/mot-de-passe', icon: 'lock', label: 'Mot de passe', short: 'Sécurité' },
   { to: '/livre-blanc', icon: 'book', label: 'Livre blanc', short: 'Livre blanc' },
 ];

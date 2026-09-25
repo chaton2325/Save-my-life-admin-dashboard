@@ -100,7 +100,7 @@
           @click="selectDoctor(doctor)"
         >
           <div class="item-row__main">
-            <span class="item-row__title">{{ doctor.firstName }} {{ doctor.lastName }}</span>
+            <span class="item-row__title">{{ doctorLabel(doctor) }}</span>
             <span class="item-row__meta" v-if="doctor.medicalOrderNumber">N° Ordre : {{ doctor.medicalOrderNumber }}</span>
           </div>
           <AppIcon name="chevronRight" size="sm" />
@@ -114,7 +114,7 @@
         <AppIcon name="chevronLeft" size="sm" /> Changer de médecin
       </button>
 
-      <h3 style="margin-top: 0">{{ selectedDoctor.firstName }} {{ selectedDoctor.lastName }}</h3>
+      <h3 style="margin-top: 0">{{ doctorLabel(selectedDoctor) }}</h3>
       <p class="hint" style="margin-top: -0.75rem">{{ selectedDoctor.speciality || 'Médecine générale' }}</p>
 
       <div class="field">
@@ -165,6 +165,7 @@ import * as doctorService from '../services/doctor.service';
 import * as clinicService from '../services/clinic.service';
 import * as appointmentService from '../services/appointment.service';
 import AppIcon from '../components/AppIcon.vue';
+import { doctorLabel } from '../utils/format';
 
 const router = useRouter();
 const route = useRoute();

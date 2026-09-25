@@ -47,6 +47,7 @@ const routes = [
       { path: 'messagerie', name: 'messages', meta: { roles: ['patient', 'medecin'] }, component: () => import('../views/MessagesView.vue') },
 
       // Commun à tous les rôles
+      { path: 'mon-profil', name: 'profile', component: () => import('../views/ProfileView.vue') },
       { path: 'mot-de-passe', name: 'change-password', component: () => import('../views/ChangePasswordView.vue') },
       { path: 'livre-blanc', name: 'livre-blanc', component: () => import('../views/LivreBlancView.vue') },
 
@@ -54,6 +55,7 @@ const routes = [
       { path: 'tableau-de-bord', name: 'admin-dashboard', meta: { roles: ['admin'] }, component: () => import('../views/AdminDashboardView.vue') },
       { path: 'patients', name: 'patients', meta: { roles: ['admin'] }, component: () => import('../views/PatientsView.vue') },
       { path: 'medecins', name: 'doctors', meta: { roles: ['admin'] }, component: () => import('../views/DoctorsView.vue') },
+      { path: 'opticiens', name: 'opticians', meta: { roles: ['admin'] }, component: () => import('../views/OpticiansView.vue') },
       { path: 'cliniques', name: 'clinics', meta: { roles: ['admin'] }, component: () => import('../views/CliniquesView.vue') },
       { path: 'administrateurs', name: 'administrators', meta: { roles: ['admin'], adminLevels: ['super_admin'] }, component: () => import('../views/AdministratorsView.vue') },
       { path: 'conflits', name: 'conflicts', meta: { roles: ['admin'], adminLevels: ['super_admin', 'read_only'] }, component: () => import('../views/ConflictsView.vue') },

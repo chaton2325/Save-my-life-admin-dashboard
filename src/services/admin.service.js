@@ -19,3 +19,12 @@ export const getActivityLogs = async ({ page = 1, limit = 20 } = {}) => {
   const { data } = await api.get('/admin/activity-logs', { params: { page, limit } });
   return data.data;
 };
+
+export const updatePatientStatus = async (id, isActive) => {
+  const { data } = await api.patch(`/admin/patients/${id}/status`, { isActive });
+  return data.data.patient;
+};
+
+export const deletePatient = async (id) => {
+  await api.delete(`/admin/patients/${id}`);
+};

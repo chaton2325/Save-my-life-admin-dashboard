@@ -73,21 +73,59 @@
                 <th>Patient</th>
                 <th>Téléphone</th>
                 <th>Inscrit le</th>
+                <th>Statut</th>
+                <th v-if="authStore.isSuperAdmin"></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="patient in patients" :key="patient.id">
-                <td class="td--primary">
-                  <div class="patient-cell">
-                    <span class="avatar avatar--muted">{{ getInitials(patient) }}</span>
-                    <span>{{ patient.firstName }} {{ patient.lastName }}</span>
-                  </div>
-                </td>
-                <td data-label="Téléphone">{{ patient.phoneNumber }}</td>
-                <td data-label="Inscrit le">{{ formatDate(patient.createdAt) }}</td>
-              </tr>
+              <template v-for="patient in patients" :key="patient.id">
+                <tr>
+                  <td class="td--primary">
+                    <div class="patient-cell">
+                      <Avatar
+                        :photo-url="patient.photoUrl"
+                        :label="`${patient.firstName} ${patient.lastName}`"
+                        :initials="getInitials(patient)"
+                        muted
+                      />
+                      <span>{{ patient.firstName }} {{ patient.lastName }}</span>
+                    </div>
+                  </td>
+                  <td data-label="Téléphone">{{ patient.phoneNumber }}</td>
+                  <td data-label="Inscrit le">{{ formatDate(patient.createdAt) }}</td>
+                  <td data-label="Statut">
+                    <span class="badge" :class="patient.isActive ? 'badge--completed' : 'badge--cancelled'">
+                      {{ patient.isActive ? 'Actif' : 'Accès restreint' }}
+                    </span>
+                  </td>
+                  <td v-if="authStore.isSuperAdmin" class="td--actions">
+                    <RowActions
+                      :title="`${patient.firstName} ${patient.lastName}`"
+                      :actions="patientActions(patient)"
+                      @select="(key) => runPatientAction(key, patient)"
+                    />
+                  </td>
+                </tr>
+                <tr v-if="deletingId === patient.id">
+                  <td :colspan="authStore.isSuperAdmin ? 5 : 4">
+                    <div class="inline-panel">
+                      <p style="margin-top: 0">
+                        Confirmer la suppression de <strong>{{ patient.firstName }} {{ patient.lastName }}</strong> ?
+                        Cette action est irréversible.
+                      </p>
+                      <p v-if="deleteError" class="alert alert--error">{{ deleteError }}</p>
+                      <div class="form-actions">
+                        <button class="btn btn--danger-ghost btn--sm" :disabled="deleteLoading" @click="confirmDelete(patient)">
+                          {{ deleteLoading ? 'Suppression...' : 'Confirmer la suppression' }}
+                        </button>
+                        <button class="btn btn--ghost btn--sm" @click="deletingId = null">Annuler</button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
               <tr v-if="patients.length === 0">
-                <td colspan="3" class="empty">Aucun patient trouvé.</td>
+                <td colspan="5" class="empty">Aucun patient trouvé.</td>
               </tr>
             </tbody>
           </table>
@@ -106,10 +144,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import * as adminService from '../services/admin.service';
+import { useAuthStore } from '../store/auth.store';
 import PaginationControl from '../components/PaginationControl.vue';
 import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
+import RowActions from '../components/RowActions.vue';
+import Avatar from '../components/Avatar.vue';
 import { formatNumber } from '../utils/format';
+
+const authStore = useAuthStore();
 
 const stats = ref(null);
 const stat = (value) => (value == null ? '–' : formatNumber(value));
@@ -154,6 +197,55 @@ const onSearchInput = () => {
 };
 
 const goToPage = (page) => fetchPatients(page);
+
+const statusBusyId = ref(null);
+const deletingId = ref(null);
+const deleteLoading = ref(false);
+const deleteError = ref('');
+
+const patientActions = (patient) => [
+  {
+    key: 'status',
+    label: patient.isActive ? 'Restreindre l’accès' : 'Réactiver',
+    icon: patient.isActive ? 'lock' : 'check',
+    disabled: statusBusyId.value === patient.id,
+  },
+  { key: 'delete', label: 'Supprimer', icon: 'trash', danger: true },
+];
+
+const runPatientAction = (key, patient) => {
+  if (key === 'status') toggleStatus(patient);
+  else if (key === 'delete') toggleDelete(patient);
+};
+
+const toggleStatus = async (patient) => {
+  statusBusyId.value = patient.id;
+  try {
+    await adminService.updatePatientStatus(patient.id, !patient.isActive);
+    await fetchPatients(pagination.value.page);
+  } finally {
+    statusBusyId.value = null;
+  }
+};
+
+const toggleDelete = (patient) => {
+  deletingId.value = deletingId.value === patient.id ? null : patient.id;
+  deleteError.value = '';
+};
+
+const confirmDelete = async (patient) => {
+  deleteLoading.value = true;
+  deleteError.value = '';
+  try {
+    await adminService.deletePatient(patient.id);
+    deletingId.value = null;
+    await fetchPatients(pagination.value.page);
+  } catch (err) {
+    deleteError.value = err.response?.data?.message || 'Impossible de supprimer ce patient.';
+  } finally {
+    deleteLoading.value = false;
+  }
+};
 
 const getInitials = (patient) =>
   `${patient.firstName?.[0] || ''}${patient.lastName?.[0] || ''}`.toUpperCase();

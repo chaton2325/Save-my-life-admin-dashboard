@@ -18,6 +18,9 @@ export const useAuthStore = defineStore('auth', {
     canManageDoctors: (state) =>
       state.user?.role === 'admin' &&
       ['super_admin', 'doctor_manager'].includes(state.user?.adminLevel),
+    canManageOpticians: (state) =>
+      state.user?.role === 'admin' &&
+      ['super_admin', 'doctor_manager'].includes(state.user?.adminLevel),
   },
 
   actions: {
@@ -26,6 +29,11 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
+    },
+
+    updateUser(patch) {
+      this.user = { ...this.user, ...patch };
+      localStorage.setItem(USER_KEY, JSON.stringify(this.user));
     },
 
     async login(phoneNumber, password) {

@@ -2,19 +2,19 @@
   <div class="page">
     <div class="page-header">
       <div>
-        <h1>Médecins</h1>
-        <p class="page-subtitle">Annuaire des médecins et de leurs cliniques de rattachement</p>
+        <h1>Opticiens</h1>
+        <p class="page-subtitle">Annuaire des opticiens et de leurs cliniques de rattachement</p>
       </div>
     </div>
 
     <div class="dash-grid kpi-strip">
       <div class="tile tile--brand kpi span-3">
         <div class="kpi__head">
-          <span class="kpi__label">Médecins</span>
-          <span class="kpi__icon"><AppIcon name="userCheck" /></span>
+          <span class="kpi__label">Opticiens</span>
+          <span class="kpi__icon"><AppIcon name="eye" /></span>
         </div>
         <div>
-          <p class="kpi__value">{{ stat(stats?.users.doctors) }}</p>
+          <p class="kpi__value">{{ stat(stats?.users.opticians) }}</p>
           <p class="kpi__meta">comptes enregistrés</p>
         </div>
       </div>
@@ -40,7 +40,7 @@
       </div>
       <div class="tile kpi span-3">
         <div class="kpi__head">
-          <span class="kpi__label">Patients par médecin</span>
+          <span class="kpi__label">Patients par opticien</span>
           <span class="kpi__icon"><AppIcon name="users" /></span>
         </div>
         <div>
@@ -52,7 +52,7 @@
 
     <div class="card card--flush">
       <div class="card__toolbar">
-        <h2 class="card__title">Liste des médecins <span class="count-chip">{{ pagination.total }}</span></h2>
+        <h2 class="card__title">Liste des opticiens <span class="count-chip">{{ pagination.total }}</span></h2>
         <div class="input-icon search-input">
           <AppIcon name="search" size="sm" />
           <input v-model="search" type="search" placeholder="Rechercher (nom, spécialité)..." @input="onSearchInput" />
@@ -62,54 +62,50 @@
       <p v-else-if="errorMessage" class="alert alert--error">{{ errorMessage }}</p>
       <template v-else>
         <div class="item-list">
-          <div v-for="doctor in doctors" :key="doctor.id">
+          <div v-for="optician in opticians" :key="optician.id">
             <div class="item-row">
               <Avatar
                 class="item-row__lead"
-                :photo-url="doctor.photoUrl"
-                :label="`Dr ${doctor.firstName} ${doctor.lastName}`"
-                :initials="initialsOf(doctor)"
-                :muted="!doctor.isActive"
+                :photo-url="optician.photoUrl"
+                :label="doctorLabel(optician)"
+                :initials="initialsOf(optician)"
+                :muted="!optician.isActive"
               />
               <div class="item-row__main">
                 <div class="item-row__heading">
-                  <span class="item-row__title">Dr {{ doctor.firstName }} {{ doctor.lastName }}</span>
-                  <span class="badge" :class="doctor.isActive ? 'badge--completed' : 'badge--cancelled'">
-                    {{ doctor.isActive ? 'Actif' : 'Accès restreint' }}
+                  <span class="item-row__title">{{ doctorLabel(optician) }}</span>
+                  <span class="badge" :class="optician.isActive ? 'badge--completed' : 'badge--cancelled'">
+                    {{ optician.isActive ? 'Actif' : 'Accès restreint' }}
                   </span>
                 </div>
                 <div class="chips">
-                  <span class="chip">{{ doctor.speciality || 'Médecine générale' }}</span>
+                  <span class="chip">{{ optician.speciality || 'Optique générale' }}</span>
                 </div>
                 <div class="meta-list">
-                  <span class="meta-item"><AppIcon name="phone" size="sm" />{{ doctor.phoneNumber }}</span>
-                  <span v-if="doctor.clinic" class="meta-item">
-                    <AppIcon name="building" size="sm" />{{ doctor.clinic.name }}
+                  <span class="meta-item"><AppIcon name="phone" size="sm" />{{ optician.phoneNumber }}</span>
+                  <span v-if="optician.clinic" class="meta-item">
+                    <AppIcon name="building" size="sm" />{{ optician.clinic.name }}
                   </span>
-                  <span
-                    v-if="doctor.medicalOrderNumber"
-                    class="meta-item"
-                    title="N° d'inscription à l'Ordre des médecins du Cameroun"
-                  >
-                    <AppIcon name="fileText" size="sm" />Ordre : {{ doctor.medicalOrderNumber }}
+                  <span v-if="optician.medicalOrderNumber" class="meta-item">
+                    <AppIcon name="fileText" size="sm" />Ordre : {{ optician.medicalOrderNumber }}
                   </span>
                 </div>
               </div>
               <RowActions
-                :title="`Dr ${doctor.firstName} ${doctor.lastName}`"
-                :actions="doctorActions(doctor)"
-                @select="(key) => runDoctorAction(key, doctor)"
+                :title="doctorLabel(optician)"
+                :actions="opticianActions(optician)"
+                @select="(key) => runOpticianAction(key, optician)"
               />
             </div>
 
-            <div v-if="editingId === doctor.id" class="inline-panel">
+            <div v-if="editingId === optician.id" class="inline-panel">
               <AvatarUpload
-                :photo-url="doctor.photoUrl"
-                :label="`Dr ${doctor.firstName} ${doctor.lastName}`"
-                :initials="initialsOf(doctor)"
-                :uploading="photoBusyId === doctor.id"
+                :photo-url="optician.photoUrl"
+                :label="doctorLabel(optician)"
+                :initials="initialsOf(optician)"
+                :uploading="photoBusyId === optician.id"
                 style="margin-bottom: var(--space-4)"
-                @select="(file) => uploadPhoto(doctor, file)"
+                @select="(file) => uploadPhoto(optician, file)"
               />
               <div class="form-grid">
                 <div class="field">
@@ -125,7 +121,7 @@
                 <div class="field">
                   <label>Spécialité</label>
                   <select v-model="editForm.speciality">
-                    <option value="">Médecine générale</option>
+                    <option value="">Optique générale</option>
                     <option v-for="s in specialities" :key="s.id" :value="s.name">
                       {{ s.name }}{{ s.isActive ? '' : ' (désactivée)' }}
                     </option>
@@ -140,43 +136,43 @@
                 </div>
               </div>
               <div class="field">
-                <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
+                <label>N° d'inscription à l'ordre</label>
                 <input v-model="editForm.medicalOrderNumber" type="text" />
               </div>
               <p v-if="editError" class="alert alert--error">{{ editError }}</p>
               <div class="form-actions">
-                <button class="btn btn--primary btn--sm" :disabled="editLoading" @click="submitEdit(doctor)">
+                <button class="btn btn--primary btn--sm" :disabled="editLoading" @click="submitEdit(optician)">
                   {{ editLoading ? 'Enregistrement...' : 'Enregistrer' }}
                 </button>
                 <button class="btn btn--ghost btn--sm" @click="editingId = null">Annuler</button>
               </div>
             </div>
 
-            <div v-if="deletingId === doctor.id" class="inline-panel">
+            <div v-if="deletingId === optician.id" class="inline-panel">
               <p style="margin-top: 0">
-                Confirmer la suppression de <strong>Dr {{ doctor.firstName }} {{ doctor.lastName }}</strong> ?
+                Confirmer la suppression de <strong>{{ doctorLabel(optician) }}</strong> ?
                 Cette action est irréversible.
               </p>
               <p v-if="deleteError" class="alert alert--error">{{ deleteError }}</p>
               <div class="form-actions">
-                <button class="btn btn--danger-ghost btn--sm" :disabled="deleteLoading" @click="confirmDelete(doctor)">
+                <button class="btn btn--danger-ghost btn--sm" :disabled="deleteLoading" @click="confirmDelete(optician)">
                   {{ deleteLoading ? 'Suppression...' : 'Confirmer la suppression' }}
                 </button>
                 <button class="btn btn--ghost btn--sm" @click="deletingId = null">Annuler</button>
               </div>
             </div>
           </div>
-          <p v-if="doctors.length === 0" class="empty">Aucun médecin trouvé.</p>
+          <p v-if="opticians.length === 0" class="empty">Aucun opticien trouvé.</p>
         </div>
 
-        <PaginationControl :page="pagination.page" :total-pages="pagination.totalPages" @change="fetchDoctors" />
+        <PaginationControl :page="pagination.page" :total-pages="pagination.totalPages" @change="fetchOpticians" />
       </template>
     </div>
 
     <CreatePanel
-      v-if="authStore.canManageDoctors"
-      title="Enregistrer un médecin"
-      trigger-label="Nouveau médecin"
+      v-if="authStore.canManageOpticians"
+      title="Enregistrer un opticien"
+      trigger-label="Nouvel opticien"
     >
       <div class="form-grid">
         <div class="field">
@@ -194,7 +190,7 @@
         <div class="field">
           <label>Spécialité</label>
           <select v-model="form.speciality">
-            <option value="">Médecine générale</option>
+            <option value="">Optique générale</option>
             <option v-for="s in activeSpecialities" :key="s.id" :value="s.name">{{ s.name }}</option>
           </select>
         </div>
@@ -207,7 +203,7 @@
         </div>
       </div>
       <div class="field">
-        <label>N° d'inscription à l'Ordre des médecins du Cameroun</label>
+        <label>N° d'inscription à l'ordre</label>
         <input v-model="form.medicalOrderNumber" type="text" placeholder="ex: ONMC-12345" />
       </div>
       <div class="field">
@@ -219,68 +215,56 @@
       <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
       <button class="btn btn--primary btn--block" :disabled="creating" @click="submit">
         <span v-if="creating" class="spinner"></span>
-        {{ creating ? 'Enregistrement...' : 'Enregistrer le médecin' }}
+        {{ creating ? 'Enregistrement...' : "Enregistrer l'opticien" }}
       </button>
     </CreatePanel>
 
-    <Modal v-if="viewingDoctor" :title="`Dr ${viewingDoctor.firstName} ${viewingDoctor.lastName}`" @close="viewingDoctor = null">
+    <Modal v-if="viewingOptician" :title="doctorLabel(viewingOptician)" @close="viewingOptician = null">
       <Avatar
         size="lg"
-        :photo-url="viewingDoctor.photoUrl"
-        :label="`Dr ${viewingDoctor.firstName} ${viewingDoctor.lastName}`"
-        :initials="initialsOf(viewingDoctor)"
-        :muted="!viewingDoctor.isActive"
+        :photo-url="viewingOptician.photoUrl"
+        :label="doctorLabel(viewingOptician)"
+        :initials="initialsOf(viewingOptician)"
+        :muted="!viewingOptician.isActive"
         style="margin-bottom: var(--space-4)"
       />
       <dl class="profile-list">
         <div class="profile-row">
           <dt>Statut</dt>
           <dd>
-            <span class="badge" :class="viewingDoctor.isActive ? 'badge--completed' : 'badge--cancelled'">
-              {{ viewingDoctor.isActive ? 'Actif' : 'Accès restreint' }}
+            <span class="badge" :class="viewingOptician.isActive ? 'badge--completed' : 'badge--cancelled'">
+              {{ viewingOptician.isActive ? 'Actif' : 'Accès restreint' }}
             </span>
           </dd>
         </div>
         <div class="profile-row">
           <dt>Spécialité</dt>
-          <dd>{{ viewingDoctor.speciality || 'Médecine générale' }}</dd>
+          <dd>{{ viewingOptician.speciality || 'Optique générale' }}</dd>
         </div>
-        <div class="profile-row" v-if="viewingDoctor.medicalOrderNumber">
-          <dt>N° Ordre des médecins du Cameroun</dt>
-          <dd>{{ viewingDoctor.medicalOrderNumber }}</dd>
+        <div class="profile-row" v-if="viewingOptician.medicalOrderNumber">
+          <dt>N° d'inscription à l'ordre</dt>
+          <dd>{{ viewingOptician.medicalOrderNumber }}</dd>
         </div>
-        <div class="profile-row" v-if="viewingDoctor.clinic">
+        <div class="profile-row" v-if="viewingOptician.clinic">
           <dt>Clinique</dt>
           <dd>
-            {{ viewingDoctor.clinic.name }}<template v-if="viewingDoctor.clinic.address"> — {{ viewingDoctor.clinic.address }}</template>
-            <button class="btn btn--ghost btn--sm" style="margin-left: var(--space-2)" @click="viewClinicFromDoctor">
+            {{ viewingOptician.clinic.name }}<template v-if="viewingOptician.clinic.address"> — {{ viewingOptician.clinic.address }}</template>
+            <button class="btn btn--ghost btn--sm" style="margin-left: var(--space-2)" @click="viewClinicFromOptician">
               <AppIcon name="building" size="sm" /> Voir la clinique
             </button>
           </dd>
         </div>
         <div class="profile-row">
           <dt>Téléphone</dt>
-          <dd>{{ viewingDoctor.phoneNumber }}</dd>
+          <dd>{{ viewingOptician.phoneNumber }}</dd>
         </div>
-        <div class="profile-row" v-if="viewingDoctor.email">
+        <div class="profile-row" v-if="viewingOptician.email">
           <dt>Email</dt>
-          <dd>{{ viewingDoctor.email }}</dd>
-        </div>
-        <div class="profile-row" v-if="viewingDoctor.gender">
-          <dt>Genre</dt>
-          <dd>{{ { M: 'Masculin', F: 'Féminin', autre: 'Autre' }[viewingDoctor.gender] || viewingDoctor.gender }}</dd>
-        </div>
-        <div class="profile-row" v-if="viewingDoctor.birthDate">
-          <dt>Date de naissance</dt>
-          <dd>{{ formatDate(viewingDoctor.birthDate) }}</dd>
-        </div>
-        <div class="profile-row" v-if="viewingDoctor.address">
-          <dt>Adresse</dt>
-          <dd>{{ viewingDoctor.address }}</dd>
+          <dd>{{ viewingOptician.email }}</dd>
         </div>
         <div class="profile-row">
           <dt>Inscrit le</dt>
-          <dd>{{ formatDate(viewingDoctor.createdAt) }}</dd>
+          <dd>{{ formatDate(viewingOptician.createdAt) }}</dd>
         </div>
       </dl>
     </Modal>
@@ -295,7 +279,7 @@ import * as doctorService from '../services/doctor.service';
 import * as clinicService from '../services/clinic.service';
 import * as specialityService from '../services/speciality.service';
 import * as adminService from '../services/admin.service';
-import { formatNumber, initialsOf } from '../utils/format';
+import { formatNumber, initialsOf, doctorLabel } from '../utils/format';
 import { useAuthStore } from '../store/auth.store';
 import PaginationControl from '../components/PaginationControl.vue';
 import SkeletonList from '../components/SkeletonList.vue';
@@ -308,34 +292,34 @@ import Avatar from '../components/Avatar.vue';
 import AvatarUpload from '../components/AvatarUpload.vue';
 
 const authStore = useAuthStore();
-const doctors = ref([]);
 const photoBusyId = ref(null);
 
-const uploadPhoto = async (doctor, file) => {
-  photoBusyId.value = doctor.id;
+const uploadPhoto = async (optician, file) => {
+  photoBusyId.value = optician.id;
   try {
-    const updated = await doctorService.uploadDoctorPhoto(doctor.id, file);
-    doctor.photoUrl = updated.photoUrl;
+    const updated = await doctorService.uploadDoctorPhoto(optician.id, file);
+    optician.photoUrl = updated.photoUrl;
   } catch (err) {
     editError.value = err.response?.data?.message || "Impossible d'envoyer cette photo.";
   } finally {
     photoBusyId.value = null;
   }
 };
-const viewingDoctor = ref(null);
+const opticians = ref([]);
+const viewingOptician = ref(null);
 const viewingClinic = ref(null);
 
-const viewClinicFromDoctor = () => {
-  viewingClinic.value = viewingDoctor.value.clinic;
-  viewingDoctor.value = null;
+const viewClinicFromOptician = () => {
+  viewingClinic.value = viewingOptician.value.clinic;
+  viewingOptician.value = null;
 };
 const clinics = ref([]);
 const clinicsTotal = ref(null);
 const stats = ref(null);
 const stat = (value) => (value == null ? '–' : formatNumber(value));
 const ratio = computed(() => {
-  const doctors = stats.value?.users.doctors;
-  return doctors ? formatNumber(Math.round(stats.value.users.patients / doctors)) : '–';
+  const opticiansCount = stats.value?.users.opticians;
+  return opticiansCount ? formatNumber(Math.round(stats.value.users.patients / opticiansCount)) : '–';
 });
 const specialities = ref([]);
 const activeSpecialities = computed(() => specialities.value.filter((s) => s.isActive));
@@ -377,16 +361,16 @@ const fetchSpecialities = async () => {
 
 const statusBusyId = ref(null);
 
-const doctorActions = (doctor) => {
+const opticianActions = (optician) => {
   const actions = [{ key: 'view', label: 'Voir', icon: 'eye' }];
-  if (authStore.canManageDoctors) {
+  if (authStore.canManageOpticians) {
     actions.push(
       { key: 'edit', label: 'Modifier', icon: 'edit' },
       {
         key: 'status',
-        label: doctor.isActive ? 'Restreindre l’accès' : 'Réactiver',
-        icon: doctor.isActive ? 'lock' : 'check',
-        disabled: statusBusyId.value === doctor.id,
+        label: optician.isActive ? 'Restreindre l’accès' : 'Réactiver',
+        icon: optician.isActive ? 'lock' : 'check',
+        disabled: statusBusyId.value === optician.id,
       },
       { key: 'delete', label: 'Supprimer', icon: 'trash', danger: true }
     );
@@ -394,18 +378,18 @@ const doctorActions = (doctor) => {
   return actions;
 };
 
-const runDoctorAction = (key, doctor) => {
-  if (key === 'view') viewingDoctor.value = doctor;
-  else if (key === 'edit') toggleEdit(doctor);
-  else if (key === 'status') toggleStatus(doctor);
-  else if (key === 'delete') toggleDelete(doctor);
+const runOpticianAction = (key, optician) => {
+  if (key === 'view') viewingOptician.value = optician;
+  else if (key === 'edit') toggleEdit(optician);
+  else if (key === 'status') toggleStatus(optician);
+  else if (key === 'delete') toggleDelete(optician);
 };
 
 const deletingId = ref(null);
 const deleteLoading = ref(false);
 const deleteError = ref('');
 
-const fetchDoctors = async (page = 1) => {
+const fetchOpticians = async (page = 1) => {
   loading.value = true;
   errorMessage.value = '';
   try {
@@ -413,12 +397,12 @@ const fetchDoctors = async (page = 1) => {
       page,
       limit: pagination.value.limit,
       search: search.value,
-      isOptician: false,
+      isOptician: true,
     });
-    doctors.value = result.doctors;
+    opticians.value = result.doctors;
     pagination.value = result.pagination;
   } catch (err) {
-    errorMessage.value = err.response?.data?.message || 'Impossible de charger les médecins.';
+    errorMessage.value = err.response?.data?.message || 'Impossible de charger les opticiens.';
   } finally {
     loading.value = false;
   }
@@ -426,7 +410,7 @@ const fetchDoctors = async (page = 1) => {
 
 const onSearchInput = () => {
   clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => fetchDoctors(1), 400);
+  searchTimeout = setTimeout(() => fetchOpticians(1), 400);
 };
 
 const formatDate = (value) =>
@@ -437,76 +421,76 @@ const submit = async () => {
   createError.value = '';
   createSuccess.value = '';
   try {
-    await doctorService.registerDoctor({ ...form.value, clinicId: form.value.clinicId || null });
-    createSuccess.value = 'Médecin enregistré avec succès.';
+    await doctorService.registerDoctor({ ...form.value, clinicId: form.value.clinicId || null, isOptician: true });
+    createSuccess.value = 'Opticien enregistré avec succès.';
     form.value = emptyForm();
-    await fetchDoctors();
+    await fetchOpticians();
   } catch (err) {
-    createError.value = err.response?.data?.message || 'Impossible d’enregistrer ce médecin.';
+    createError.value = err.response?.data?.message || 'Impossible d’enregistrer cet opticien.';
   } finally {
     creating.value = false;
   }
 };
 
-const toggleEdit = (doctor) => {
-  editingId.value = editingId.value === doctor.id ? null : doctor.id;
+const toggleEdit = (optician) => {
+  editingId.value = editingId.value === optician.id ? null : optician.id;
   deletingId.value = null;
   editError.value = '';
   editForm.value = {
-    firstName: doctor.firstName,
-    lastName: doctor.lastName,
-    speciality: doctor.speciality || '',
-    medicalOrderNumber: doctor.medicalOrderNumber || '',
-    clinicId: doctor.clinicId || '',
+    firstName: optician.firstName,
+    lastName: optician.lastName,
+    speciality: optician.speciality || '',
+    medicalOrderNumber: optician.medicalOrderNumber || '',
+    clinicId: optician.clinicId || '',
   };
 };
 
-const submitEdit = async (doctor) => {
+const submitEdit = async (optician) => {
   editLoading.value = true;
   editError.value = '';
   try {
-    await doctorService.updateDoctor(doctor.id, { ...editForm.value, clinicId: editForm.value.clinicId || null });
+    await doctorService.updateDoctor(optician.id, { ...editForm.value, clinicId: editForm.value.clinicId || null });
     editingId.value = null;
-    await fetchDoctors(pagination.value.page);
+    await fetchOpticians(pagination.value.page);
   } catch (err) {
-    editError.value = err.response?.data?.message || 'Impossible de modifier ce médecin.';
+    editError.value = err.response?.data?.message || 'Impossible de modifier cet opticien.';
   } finally {
     editLoading.value = false;
   }
 };
 
-const toggleStatus = async (doctor) => {
-  statusBusyId.value = doctor.id;
+const toggleStatus = async (optician) => {
+  statusBusyId.value = optician.id;
   try {
-    await doctorService.updateDoctorStatus(doctor.id, !doctor.isActive);
-    await fetchDoctors(pagination.value.page);
+    await doctorService.updateDoctorStatus(optician.id, !optician.isActive);
+    await fetchOpticians(pagination.value.page);
   } finally {
     statusBusyId.value = null;
   }
 };
 
-const toggleDelete = (doctor) => {
-  deletingId.value = deletingId.value === doctor.id ? null : doctor.id;
+const toggleDelete = (optician) => {
+  deletingId.value = deletingId.value === optician.id ? null : optician.id;
   editingId.value = null;
   deleteError.value = '';
 };
 
-const confirmDelete = async (doctor) => {
+const confirmDelete = async (optician) => {
   deleteLoading.value = true;
   deleteError.value = '';
   try {
-    await doctorService.deleteDoctor(doctor.id);
+    await doctorService.deleteDoctor(optician.id);
     deletingId.value = null;
-    await fetchDoctors(pagination.value.page);
+    await fetchOpticians(pagination.value.page);
   } catch (err) {
-    deleteError.value = err.response?.data?.message || 'Impossible de supprimer ce médecin.';
+    deleteError.value = err.response?.data?.message || 'Impossible de supprimer cet opticien.';
   } finally {
     deleteLoading.value = false;
   }
 };
 
 onMounted(() => {
-  fetchDoctors();
+  fetchOpticians();
   fetchClinics();
   fetchSpecialities();
   adminService

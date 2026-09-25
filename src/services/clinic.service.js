@@ -20,6 +20,13 @@ export const updateClinic = async (id, payload) => {
   return data.data.clinic;
 };
 
+export const uploadClinicLogo = async (id, file) => {
+  const form = new FormData();
+  form.append('image', file);
+  const { data } = await api.post(`/clinics/${id}/logo`, form);
+  return data.data.clinic;
+};
+
 export const deleteClinic = async (id) => {
   await api.delete(`/clinics/${id}`);
 };

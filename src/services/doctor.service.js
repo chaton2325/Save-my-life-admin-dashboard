@@ -8,9 +8,10 @@ export const getDoctors = async ({
   clinicId = '',
   latitude,
   longitude,
+  isOptician,
 } = {}) => {
   const { data } = await api.get('/doctors', {
-    params: { page, limit, search, speciality, clinicId, latitude, longitude },
+    params: { page, limit, search, speciality, clinicId, latitude, longitude, isOptician },
   });
   return data.data;
 };
@@ -37,6 +38,13 @@ export const registerDoctor = async (payload) => {
 
 export const updateDoctor = async (id, payload) => {
   const { data } = await api.patch(`/doctors/${id}`, payload);
+  return data.data.doctor;
+};
+
+export const uploadDoctorPhoto = async (id, file) => {
+  const form = new FormData();
+  form.append('image', file);
+  const { data } = await api.post(`/doctors/${id}/photo`, form);
   return data.data.doctor;
 };
 

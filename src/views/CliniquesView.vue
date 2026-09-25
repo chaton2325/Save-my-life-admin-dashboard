@@ -64,7 +64,14 @@
         <div class="item-list">
           <div v-for="clinic in clinics" :key="clinic.id">
             <div class="item-row">
-              <span class="lead-icon item-row__lead" :class="{ 'lead-icon--muted': !clinic.isActive }">
+              <Avatar
+                v-if="clinic.logoUrl"
+                class="item-row__lead"
+                shape="square"
+                :photo-url="clinic.logoUrl"
+                :label="clinic.name"
+              />
+              <span v-else class="lead-icon item-row__lead" :class="{ 'lead-icon--muted': !clinic.isActive }">
                 <AppIcon name="building" />
               </span>
               <div class="item-row__main">
@@ -94,6 +101,15 @@
             </div>
 
             <div v-if="editingId === clinic.id" class="inline-panel">
+              <AvatarUpload
+                shape="square"
+                :photo-url="clinic.logoUrl"
+                :label="clinic.name"
+                :initials="clinic.name.slice(0, 2).toUpperCase()"
+                :uploading="logoBusyId === clinic.id"
+                style="margin-bottom: var(--space-4)"
+                @select="(file) => uploadLogo(clinic, file)"
+              />
               <ClinicForm v-model="editForm" />
               <div class="field">
                 <label>
@@ -151,6 +167,8 @@ import SkeletonList from '../components/SkeletonList.vue';
 import AppIcon from '../components/AppIcon.vue';
 import LocationPicker from '../components/LocationPicker.vue';
 import CreatePanel from '../components/CreatePanel.vue';
+import Avatar from '../components/Avatar.vue';
+import AvatarUpload from '../components/AvatarUpload.vue';
 
 // Petit sous-composant local : champs communs au formulaire de création/édition d'une clinique,
 // avec conversion texte <-> tableau pour les téléphones et services.
@@ -281,6 +299,20 @@ const editError = ref('');
 const deletingId = ref(null);
 const deleteLoading = ref(false);
 const deleteError = ref('');
+
+const logoBusyId = ref(null);
+
+const uploadLogo = async (clinic, file) => {
+  logoBusyId.value = clinic.id;
+  try {
+    const updated = await clinicService.uploadClinicLogo(clinic.id, file);
+    clinic.logoUrl = updated.logoUrl;
+  } catch (err) {
+    editError.value = err.response?.data?.message || "Impossible d'envoyer ce logo.";
+  } finally {
+    logoBusyId.value = null;
+  }
+};
 
 const toPayload = (f) => ({
   name: f.name,

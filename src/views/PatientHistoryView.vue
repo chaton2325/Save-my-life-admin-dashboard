@@ -48,7 +48,7 @@
           </div>
           <div class="item-row__main">
             <div class="item-row__heading">
-              <span class="item-row__title">{{ report.doctor?.firstName }} {{ report.doctor?.lastName }}</span>
+              <span class="item-row__title">{{ doctorLabel(report.doctor) }}</span>
               <span v-if="report.diagnosis" class="chip">{{ report.diagnosis }}</span>
             </div>
             <span v-if="report.notes" class="item-row__meta">{{ report.notes }}</span>
@@ -129,7 +129,7 @@ import * as consultationService from '../services/consultation.service';
 import * as prescriptionService from '../services/prescription.service';
 import AppIcon from '../components/AppIcon.vue';
 import CreatePanel from '../components/CreatePanel.vue';
-import { dateParts } from '../utils/format';
+import { dateParts, doctorLabel } from '../utils/format';
 
 const route = useRoute();
 const patientId = route.params.id;

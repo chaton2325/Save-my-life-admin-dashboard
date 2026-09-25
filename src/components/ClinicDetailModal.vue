@@ -1,5 +1,13 @@
 <template>
   <Modal :title="clinic.name" @close="$emit('close')">
+    <Avatar
+      v-if="clinic.logoUrl"
+      size="lg"
+      shape="square"
+      :photo-url="clinic.logoUrl"
+      :label="clinic.name"
+      style="margin-bottom: var(--space-4)"
+    />
     <dl class="profile-list">
       <div class="profile-row">
         <dt>Statut</dt>
@@ -28,8 +36,9 @@
       <div class="profile-row" v-if="clinic.doctors?.length">
         <dt>Médecins</dt>
         <dd>
-          <div v-for="doctor in clinic.doctors" :key="doctor.id">
-            {{ doctor.firstName }} {{ doctor.lastName }} — {{ doctor.speciality || 'Médecine générale' }}
+          <div v-for="doctor in clinic.doctors" :key="doctor.id" class="clinic-doctor-row">
+            <Avatar size="sm" :photo-url="doctor.photoUrl" :label="doctorLabel(doctor)" :initials="initialsOf(doctor)" />
+            <span>{{ doctorLabel(doctor) }} — {{ doctor.speciality || 'Médecine générale' }}</span>
           </div>
         </dd>
       </div>
@@ -45,7 +54,18 @@
 <script setup>
 import Modal from './Modal.vue';
 import LocationPicker from './LocationPicker.vue';
+import Avatar from './Avatar.vue';
+import { doctorLabel, initialsOf } from '../utils/format';
 
 defineProps({ clinic: { type: Object, required: true } });
 defineEmits(['close']);
 </script>
+
+<style scoped>
+.clinic-doctor-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+</style>

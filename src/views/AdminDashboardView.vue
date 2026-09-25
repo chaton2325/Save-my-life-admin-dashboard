@@ -204,6 +204,7 @@ const quickLinks = computed(() => {
   const links = [
     { to: '/patients', icon: 'users', label: 'Patients', desc: 'Consulter et rechercher' },
     { to: '/medecins', icon: 'userCheck', label: 'Médecins', desc: 'Gérer les comptes médecins' },
+    { to: '/opticiens', icon: 'eye', label: 'Opticiens', desc: 'Gérer les comptes opticiens' },
     { to: '/conflits', icon: 'alertTriangle', label: 'Conflits', desc: 'Rendez-vous en chevauchement' },
     { to: '/statistiques', icon: 'activity', label: 'Statistiques', desc: 'Rapports détaillés' },
   ];

@@ -4,7 +4,12 @@
       <section class="tile tile--brand hero span-8">
         <p class="hero__date">{{ today }}</p>
         <div class="identity">
-          <span class="avatar avatar--lg" aria-hidden="true">{{ initials }}</span>
+          <Avatar
+            size="lg"
+            :photo-url="authStore.user?.photoUrl"
+            :label="authStore.user?.firstName"
+            :initials="initials"
+          />
           <div>
             <h1>Bonjour, {{ authStore.user?.firstName }}</h1>
             <p class="identity__meta">
@@ -166,6 +171,7 @@ import { todayLabel } from '../utils/format';
 import AppIcon from '../components/AppIcon.vue';
 import GaugeChart from '../components/GaugeChart.vue';
 import EmailVerificationModal from '../components/EmailVerificationModal.vue';
+import Avatar from '../components/Avatar.vue';
 
 const authStore = useAuthStore();
 const loading = ref(false);

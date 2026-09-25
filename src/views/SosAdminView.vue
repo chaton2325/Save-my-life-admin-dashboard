@@ -48,7 +48,12 @@
      <div class="item-list">
       <div v-for="request in requests" :key="request.id" class="sos-request">
         <div class="sos-request__head">
-          <span class="avatar item-row__lead" aria-hidden="true">{{ initialsOf(request.patient) }}</span>
+          <Avatar
+            class="item-row__lead"
+            :photo-url="request.patient?.photoUrl"
+            :label="`${request.patient?.firstName} ${request.patient?.lastName}`"
+            :initials="initialsOf(request.patient)"
+          />
           <div class="item-row__main">
             <div class="item-row__heading">
               <span class="item-row__title">{{ request.patient?.firstName }} {{ request.patient?.lastName }}</span>
@@ -113,6 +118,7 @@ import * as sosTypeService from '../services/sosType.service';
 import { SOS_STATUS_LABELS, SOS_STATUS_BADGE } from '../services/sos.service';
 import AppIcon from '../components/AppIcon.vue';
 import PaginationControl from '../components/PaginationControl.vue';
+import Avatar from '../components/Avatar.vue';
 import { initialsOf } from '../utils/format';
 
 const SOS_STATUSES = Object.keys(SOS_STATUS_LABELS);

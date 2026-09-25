@@ -2,11 +2,15 @@
 const ACTION_LABELS = {
   'admin.appoint_admin': 'A nommé un administrateur',
   'admin.register_doctor': 'A enregistré un médecin',
+  'admin.register_optician': 'A enregistré un opticien',
   'admin.update_doctor': 'A modifié un médecin',
   'admin.activate_doctor': 'A réactivé un médecin',
   'admin.deactivate_doctor': 'A restreint l’accès à un médecin',
   'admin.delete_doctor': 'A supprimé un médecin',
   'admin.assign_patient_doctor': 'A assigné un patient à un médecin',
+  'admin.activate_patient': 'A réactivé un patient',
+  'admin.deactivate_patient': 'A restreint l’accès à un patient',
+  'admin.delete_patient': 'A supprimé un patient',
   'appointment.resolve_conflict': 'A résolu un conflit de rendez-vous',
 };
 

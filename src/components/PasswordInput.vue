@@ -9,7 +9,7 @@
       tabindex="-1"
       @click="visible = !visible"
     >
-      <AppIcon :name="visible ? 'eyeOff' : 'eye'" size="sm" />
+      <AppIcon :name="visible ? 'eyeOff' : 'eye'" size="md" />
     </button>
   </div>
 </template>
@@ -25,21 +25,27 @@ const visible = ref(false);
 
 <style scoped>
 .input-icon--password input {
-  padding-right: 42px;
+  padding-right: 48px;
 }
 .input-icon__toggle {
   position: absolute;
-  right: 10px;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  width: 40px;
+  height: 40px;
   border: none;
+  border-radius: var(--radius);
   background: transparent;
-  color: var(--color-text-faint);
+  color: var(--color-text-muted);
   cursor: pointer;
 }
-.input-icon__toggle:hover {
-  color: var(--color-text-muted);
+.input-icon__toggle:hover,
+.input-icon__toggle:active {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
 }
 </style>
