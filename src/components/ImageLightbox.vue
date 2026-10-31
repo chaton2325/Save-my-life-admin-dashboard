@@ -4,7 +4,16 @@
       <button class="lightbox-close" type="button" aria-label="Fermer" @click="$emit('close')">
         <AppIcon name="x" size="sm" />
       </button>
-      <img :src="src" :alt="alt" class="lightbox-image" />
+      <button v-if="navigable" class="lightbox-nav lightbox-nav--prev" type="button" aria-label="Précédente" @click="$emit('prev')">
+        <AppIcon name="chevronRight" size="sm" style="transform: rotate(180deg)" />
+      </button>
+      <figure class="lightbox-figure">
+        <img :src="src" :alt="alt" class="lightbox-image" />
+        <figcaption v-if="caption" class="lightbox-caption">{{ caption }}</figcaption>
+      </figure>
+      <button v-if="navigable" class="lightbox-nav lightbox-nav--next" type="button" aria-label="Suivante" @click="$emit('next')">
+        <AppIcon name="chevronRight" size="sm" />
+      </button>
     </div>
   </Teleport>
 </template>
@@ -14,16 +23,22 @@ import { onMounted, onBeforeUnmount } from 'vue';
 import AppIcon from './AppIcon.vue';
 import { useScrollLock } from '../composables/useScrollLock';
 
-defineProps({
+const props = defineProps({
   src: { type: String, required: true },
   alt: { type: String, default: '' },
+  /** Légende affichée sous l'image (nom de l'image dans une galerie) */
+  caption: { type: String, default: '' },
+  /** Affiche les flèches précédente / suivante (galerie) */
+  navigable: { type: Boolean, default: false },
 });
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'prev', 'next']);
 
 useScrollLock();
 
 const onKeydown = (e) => {
   if (e.key === 'Escape') emit('close');
+  if (props.navigable && e.key === 'ArrowLeft') emit('prev');
+  if (props.navigable && e.key === 'ArrowRight') emit('next');
 };
 
 onMounted(() => window.addEventListener('keydown', onKeydown));
@@ -65,6 +80,44 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
   justify-content: center;
   cursor: pointer;
   z-index: 1;
+}
+.lightbox-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+.lightbox-caption {
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  max-width: min(90vw, 720px);
+}
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+}
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+.lightbox-nav--prev {
+  left: var(--space-3);
+}
+.lightbox-nav--next {
+  right: calc(var(--space-3) + var(--safe-right));
 }
 .lightbox-close:hover {
   background: rgba(255, 255, 255, 0.24);

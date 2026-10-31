@@ -101,15 +101,7 @@
             </div>
 
             <div v-if="editingId === clinic.id" class="inline-panel">
-              <AvatarUpload
-                shape="square"
-                :photo-url="clinic.logoUrl"
-                :label="clinic.name"
-                :initials="clinic.name.slice(0, 2).toUpperCase()"
-                :uploading="logoBusyId === clinic.id"
-                style="margin-bottom: var(--space-4)"
-                @select="(file) => uploadLogo(clinic, file)"
-              />
+              <ClinicMediaEditor :clinic="clinic" @clinic-updated="(patch) => Object.assign(clinic, patch)" />
               <ClinicForm v-model="editForm" />
               <div class="field">
                 <label>
@@ -148,6 +140,7 @@
 
     <CreatePanel title="Enregistrer une clinique" trigger-label="Nouvelle clinique">
       <ClinicForm v-model="form" />
+      <ClinicMediaEditor :key="mediaKey" v-model="draftMedia" />
 
       <p v-if="createError" class="alert alert--error">{{ createError }}</p>
       <p v-if="createSuccess" class="alert alert--success">{{ createSuccess }}</p>
@@ -168,7 +161,7 @@ import AppIcon from '../components/AppIcon.vue';
 import LocationPicker from '../components/LocationPicker.vue';
 import CreatePanel from '../components/CreatePanel.vue';
 import Avatar from '../components/Avatar.vue';
-import AvatarUpload from '../components/AvatarUpload.vue';
+import ClinicMediaEditor from '../components/ClinicMediaEditor.vue';
 
 // Petit sous-composant local : champs communs au formulaire de création/édition d'une clinique,
 // avec conversion texte <-> tableau pour les téléphones et services.
@@ -300,18 +293,26 @@ const deletingId = ref(null);
 const deleteLoading = ref(false);
 const deleteError = ref('');
 
-const logoBusyId = ref(null);
+// Médias saisis à la création : envoyés après que la clinique existe (il faut son id).
+const emptyMedia = () => ({ logo: null, cover: null, gallery: [] });
+const draftMedia = ref(emptyMedia());
+const mediaKey = ref(0);
 
-const uploadLogo = async (clinic, file) => {
-  logoBusyId.value = clinic.id;
-  try {
-    const updated = await clinicService.uploadClinicLogo(clinic.id, file);
-    clinic.logoUrl = updated.logoUrl;
-  } catch (err) {
-    editError.value = err.response?.data?.message || "Impossible d'envoyer ce logo.";
-  } finally {
-    logoBusyId.value = null;
+const uploadDraftMedia = async (clinicId, media) => {
+  const failures = [];
+  const run = async (label, fn) => {
+    try {
+      await fn();
+    } catch {
+      failures.push(label);
+    }
+  };
+  if (media.logo) await run('la photo de profil', () => clinicService.uploadClinicLogo(clinicId, media.logo));
+  if (media.cover) await run('la couverture', () => clinicService.uploadClinicCover(clinicId, media.cover));
+  for (const item of media.gallery) {
+    await run(`« ${item.name} »`, () => clinicService.addGalleryImage(clinicId, item.file, item.name));
   }
+  return failures;
 };
 
 const toPayload = (f) => ({
@@ -351,9 +352,14 @@ const submit = async () => {
   createError.value = '';
   createSuccess.value = '';
   try {
-    await clinicService.createClinic(toPayload(form.value));
-    createSuccess.value = 'Clinique enregistrée avec succès.';
+    const created = await clinicService.createClinic(toPayload(form.value));
+    const failures = await uploadDraftMedia(created.id, draftMedia.value);
+    createSuccess.value = failures.length
+      ? `Clinique enregistrée, mais l’envoi a échoué pour : ${failures.join(', ')}. Ajoutez-les via « Modifier ».`
+      : 'Clinique enregistrée avec succès.';
     form.value = emptyForm();
+    draftMedia.value = emptyMedia();
+    mediaKey.value += 1;
     await Promise.all([fetchClinics(), fetchOverview()]);
   } catch (err) {
     createError.value = err.response?.data?.message || 'Impossible d’enregistrer cette clinique.';

@@ -51,6 +51,9 @@
               <template v-if="clinic.distanceKm != null"> · {{ clinic.distanceKm.toFixed(1) }} km</template>
             </span>
           </div>
+          <button type="button" class="btn btn--ghost btn--sm" @click.stop="viewingClinic = clinic">
+            <AppIcon name="camera" size="sm" /> Voir
+          </button>
           <AppIcon name="chevronRight" size="sm" />
         </div>
         <p v-if="loadingClinics" class="state-message"><span class="spinner spinner--dark"></span> Chargement...</p>
@@ -155,11 +158,13 @@
         </button>
       </template>
     </div>
+    <ClinicDetailModal v-if="viewingClinic" :clinic="viewingClinic" @close="viewingClinic = null" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import ClinicDetailModal from '../components/ClinicDetailModal.vue';
 import { useRouter, useRoute } from 'vue-router';
 import * as doctorService from '../services/doctor.service';
 import * as clinicService from '../services/clinic.service';
@@ -170,6 +175,7 @@ import { doctorLabel } from '../utils/format';
 const router = useRouter();
 const route = useRoute();
 
+const viewingClinic = ref(null);
 const step = ref('clinic'); // clinic | speciality | doctor | schedule
 
 const STEP_ORDER = ['clinic', 'speciality', 'doctor', 'schedule'];

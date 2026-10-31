@@ -76,6 +76,9 @@
 
       <div class="item-list">
         <div v-for="entry in result.clinics" :key="entry.clinic.id" class="card">
+          <button type="button" class="btn btn--ghost btn--sm" style="float: right" @click="viewingClinic = entry.clinic">
+            <AppIcon name="camera" size="sm" /> Voir la clinique
+          </button>
           <div class="item-row__main" style="margin-bottom: var(--space-3)">
             <span class="item-row__title">{{ entry.clinic.name }}</span>
             <span class="item-row__meta">
@@ -98,17 +101,20 @@
         </p>
       </div>
     </template>
+    <ClinicDetailModal v-if="viewingClinic" :clinic="viewingClinic" @close="viewingClinic = null" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import ClinicDetailModal from '../components/ClinicDetailModal.vue';
 import { useRouter } from 'vue-router';
 import * as orientationService from '../services/orientation.service';
 import AppIcon from '../components/AppIcon.vue';
 import { doctorLabel } from '../utils/format';
 
 const router = useRouter();
+const viewingClinic = ref(null);
 
 const description = ref('');
 const position = ref(null);
